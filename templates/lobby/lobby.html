@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby | MARKETSMITH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+    /* Logout Pop-up Styles */
+    #logout-overlay {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(13, 6, 20, 0.95); /* Deep dark purple blur */
+        z-index: 9999; /* Stays on top of everything */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logout-text {
+        color: #fce34d; /* Technex Gold */
+        font-family: 'Lora', serif;
+        font-size: 2rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid #fce34d;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+</style>
+
+<script>
+    function handleLogout(event) {
+        // 1. Stop the form from submitting instantly
+        event.preventDefault(); 
+        
+        // 2. Show the fancy pop-up overlay
+        document.getElementById('logout-overlay').style.display = 'flex';
+        
+        // 3. Wait exactly 2 seconds (2000 milliseconds), then submit to backend
+        setTimeout(function() {
+            document.getElementById('logout-form').submit();
+        }, 2000);
+    }
+</script>
+    <style>
+    /* Upgraded Profile Table Styling */
+    .profile-table-fixed {
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto;
+        border-collapse: collapse;
+        background-color: #1a0f2e; /* Matches your dark panel aesthetic */
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+    
+    .profile-table-fixed th, 
+    .profile-table-fixed td {
+        padding: 25px 30px; /* Large spacing */
+        text-align: left;
+        border-bottom: 2px solid #3d2b56;
+        font-size: 1.3rem; /* Much larger font */
+    }
+    
+    .profile-table-fixed th {
+        color: #fce34d; /* Technex Gold */
+        font-weight: 800; /* Extra bold headers */
+        width: 45%;
+        letter-spacing: 1px;
+    }
+    
+    .profile-table-fixed td {
+        color: #ffffff;
+        font-weight: 700; /* Bold values */
+        font-family: monospace; /* Gives it a data/tech feel */
+        font-size: 1.4rem;
+    }
+
+    /* Remove border from the last row */
+    .profile-table-fixed tr:last-child th,
+    .profile-table-fixed tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+</head>
+<body class="lobby-page-bg">
+    <header class="cf-header">
+        <div class="header-inner">
+            <img src="{% static 'logo.png' %}" alt="Technex" class="header-logo">
+            <nav class="cf-tabs">
+                <button class="tab-link active" onclick="switchTab(event, 'leaderboard')">LEADERBOARD</button>
+                <button class="tab-link" onclick="switchTab(event, 'rules')">HOW TO PLAY</button>
+                <button class="tab-link" onclick="switchTab(event, 'profile')">PROFILE</button>
+
+                {% if not user.is_authenticated %}
+    <a href="{% url 'login' %}" class="tab-link login-link">LOGIN</a>
+{% else %}
+    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:inline;" onsubmit="handleLogout(event)">
+        {% csrf_token %}
+        <button type="submit" class="tab-link">LOGOUT</button>
+    </form>
+{% endif %}
+            </nav>
+            <img src="{% static 'logo2.png' %}" alt="SNC" class="header-logo">
+        </div>
+    </header>
+<div id="logout-overlay">
+    <div class="spinner"></div>
+    <div class="logout-text">Logging you out...</div>
+</div>
+    <main class="dashboard-content">
+        <section id="leaderboard" class="tab-pane active">
+            <div class="view-header">
+                <h3>Live Market Rankings</h3>
+                <form method="POST" action="{% url 'matchmaking' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="join-btn">
+                        START MATCHMAKING
+                    </button>
+                </form>
+            </div>
+            <table class="market-table">
+                <thead>
+                    <tr>
+                        <th>RANK</th>
+                        <th>PARTICIPANT</th>
+                        <th>TOTAL PNL</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    {% if leaderboard %}
+                        {% for player in leaderboard %}
+                            <tr>
+                                <td>#{{ forloop.counter }}</td>
+                                <td>{{ player.user__username }}</td>
+                                <td>{{ player.total_pnl }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align:center;">Login to see leaderboard...</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <div id="action-zone"></div>
+        </section>
+
+        <section id="rules" class="tab-pane">
+            <div class="view-header"><h3>Game Protocol</h3></div>
+            <div class="manual-container">
+                <h4>Interface</h4>
+                <ul>
+                    <li>All registered players will be divided into groups of six.</li>
+                    <li>One common playing table will be shared among players of the group.</li>
+                    <li>All players on the table can view the current question along with the holdings and PnL of other players.</li>
+                </ul>
+                <h4>Game Framework</h4>
+                <ul>
+                    <li>Six digits (1-9) are generated at the start of each round.</li>
+                    <li>The digits remain unrevealed throughout the round.</li>
+                    <li>The PnL of every player at the start of the round will be set to zero.</li>
+                </ul>
+                <h4>Question Phase</h4>
+                <ul>
+                    <li>One question appears on the dashboard at the start of every turn.</li>
+                    <li>The correct answer corresponds to the digit for that turn.</li>
+                    <li>Players must keep answers to themselves.</li>
+                </ul>
+                <h4>Assets & Ownership</h4>
+                <ul>
+                    <li>The value of one asset equals the sum of all six digits.</li>
+                    <li>Each player starts with 2 assets.</li>
+                    <li>An additional asset is given after the third turn.</li>
+                    <li>There is no limit on maximum holdings per player.</li>
+                </ul>
+                <h4>Trading Rules</h4>
+                <ul>
+                    <li>Players may quote bid and/or ask prices after solving the question in the 30-second window.</li>
+                    <li>The orders set by players must be of one asset.</li>
+                    <li>A trade is executed when bid and ask of two players are met.</li>
+                </ul>
+                <h4>Trading Logic & Execution Rules</h4>
+                <ul>
+                    <li>If the highest bid is less than the lowest ask, no trades will be executed.</li>
+                    <li>If the highest bid is higher than the lowest ask, trades will be executed following rules similar to a stock exchange.</li>
+                    <li>Trades will be executed at the ask price.</li>
+                    <li>Orders are matched from best bid and best ask outward.</li>
+                    <li>In case of a tie, the player booking the order first will be given priority.</li>
+                    <li>No money is kept by the dealer (sum of all players’ PnL is always zero).</li>
+                </ul>
+                <h4>End of Round</h4>
+                <ul>
+                    <li>True asset value is revealed.</li>
+                    <li>Final wealth = cash + asset valuation.</li>
+                    <li>Players are ranked by total profit.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="profile" class="tab-pane">
+    <div class="view-header">
+        <h3 style="text-align: center; width: 100%;">Participant Data</h3>
+    </div>
+    
+    {% if user.is_authenticated %}
+        <table class="profile-table-fixed">
+            <tr>
+                <th>PARTICIPANT NAME</th>
+                <td>{{ user.username }}</td>
+            </tr>
+            <!-- <tr>
+                <th>TECHNEX ID</th>
+                <td>
+                    {% if user.profile.techhnex_id %}
+                        {{ user.profile.techhnex_id }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+            </tr> -->
+            <tr>
+                <th>CURRENT PNL</th>
+                <td id="profile-pnl" style="color: {% if total_pnl > 0 %}#4caf50{% elif total_pnl < 0 %}#f44336{% else %}#ffffff{% endif %};">
+                    {{ total_pnl }}
+                </td>
+            </tr>
+        </table>
+    {% else %}
+        <p style="text-align: center; font-size: 1.2rem; color: #fff;">Please login to view your profile data.</p>
+    {% endif %}
+</section>
+    </main>
+
+    <footer class="single-line-footer">
+        <span class="footer-item">📞 +91 99608 70886 : Akshith</span>
+            <span class="footer-item">📞 +91 79921 79759 : Namish</span>
+            <a href="https://www.technex.in/" target="_blank" class="footer-link">
+                Visit Technex Website
+            </a>
+    </footer>
+
+    <script>
+        const gameId = "{{ game_id|default:'' }}";
+        const currentUserName = "{{ request.user.username|default:'' }}";
+    </script>
+    <script src="{% static 'script.js' %}"></script>
+    <script>window.onload = initLobby;</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+django
+channels
+daphne
+whitenoise
+pandas
+numpy
+python-dotenv
+psycopg2-binary
+dj-database-url
+channels_redis

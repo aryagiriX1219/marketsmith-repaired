@@ -1,0 +1,193 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Game Interface</title>
+    <link rel="stylesheet" href="{% static 'gameplay.css' %}">
+</head>
+<body>
+    <div class="logo-center-container">
+        <img src="{% static 'logo.png' %}" alt="Logo 1" class="header-logo">
+    </div>
+    <div class="logo-center-container1">
+        <img src="{% static 'logo2.png' %}" alt="Logo 2" class="header-logo">
+    </div>
+    <div class="app-container">
+        <div class="left-panel">
+            <div class="question-container">
+                <h2 id="question-text">
+                    ROUND {{ game.current_round }}
+                </h2>
+            </div>
+            
+
+            <div class="table-area">
+                <div class="poker-table">
+
+                    <div class="center-question">
+                        <h2>{{ question }}</h2>
+                    </div>
+
+                    {% for p in players %}
+                    <div class="player-wrapper
+                        {% if p.seat_number == 1 %}player-bottom{% endif %}
+                        {% if p.seat_number == 2 %}player-bottom-right{% endif %}
+                        {% if p.seat_number == 3 %}player-top-right{% endif %}
+                        {% if p.seat_number == 4 %}player-top{% endif %}
+                        {% if p.seat_number == 5 %}player-top-left{% endif %}
+                        {% if p.seat_number == 6 %}player-bottom-left{% endif %}
+                    ">
+                        {% if p.seat_number == 3 or p.seat_number == 4 or p.seat_number == 5 %}
+                            <!-- For top side players: info first, avatar below -->
+                            <div class="player-info">
+                                <div class="player-stats">
+                                    cash: ${{ p.cash }}<br>Assets: {{ p.asset_count }}
+                                </div>
+                                <div class="player-name">{{ p.user.username }}</div>
+                            </div>
+                            <div class="player"></div>
+                        {% else %}
+                            <!-- For bottom side players: avatar first, info below -->
+                            <div class="player"></div>
+                            <div class="player-info">
+                                <div class="player-name">{{ p.user.username }}</div>
+                                <div class="player-stats">
+                                    cash: ${{ p.cash }}<br>Assets: {{ p.asset_count }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            {% if not show_trade_log_popup %}
+            <div class="trading-controls">
+            {% else %}
+            <div class="trading-controls" style="opacity:0.5; pointer-events:none;">
+                <p style="text-align:center;">Trading Closed</p>
+            {% endif %}
+                <input
+                        type="number"
+                        id="price-input"
+                        placeholder="Enter price"
+                        min="1"
+                        step="1"
+                        required
+                    />
+                <div class="action-buttons">
+                    <button class="btn buy-btn" onclick="executeTrade('Buy')">Buy</button>
+                    <button class="btn sell-btn" onclick="executeTrade('Sell')">Sell</button>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <div class="section-header">Working Orders</div>
+                <div class="data-row header-row">
+                    <span>Action</span>
+                    <span>Price</span>
+                    <!-- <span>Cancel</span> -->
+                </div>
+                <div class="data-content" id="working-orders-list"></div>
+            </div>
+            
+            <div class="data-section">
+                <div class="section-header">My Trade History</div>
+                <div class="data-row header-row">
+                    <span>Round</span>
+                    <span>Buyer</span>
+                    <span>Seller</span>
+                    <span>Price</span>
+                </div>
+                <div class="data-content" id="trades-list">
+                    {% for trade in trade_log %}
+                    <div class="data-row">
+                        <span> ROUND {{ trade.round }}</span>
+                        <span>{{ trade.buyer }}</span>
+                        <span>{{ trade.seller }}</span>
+                        <span>${{ trade.price }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% if show_trade_log_popup %}
+    <div style="
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #120e1f;
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 999;
+    border: 1px solid #322544;
+    text-align:center;
+    ">
+        <h3>Round Trades</h3>
+        {% if current_round_trades %}
+            {% for trade in current_round_trades %}
+                <div>
+                    {{ trade.buyer }} bought from {{ trade.seller }} @ ${{ trade.price }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div>No trades this round</div>
+        {% endif %}
+
+        <p>Next round starting...</p>
+    </div>
+
+    <script>
+    setTimeout(() => {
+        location.reload();
+    }, 10000);
+    </script>
+    {% endif %}
+    <script>
+        window.currentGameId = "{{ game.id }}";
+        // We use username here because your trade_log likely stores strings, not IDs
+        window.currentUserName = "{{ request.user.username }}"; 
+    </script>
+
+    <script id="trade-data" type="application/json">
+        {{ trade_log|default:"[]"|safe }}
+    </script>
+
+    <script src="{% static 'gameplay.js' %}"></script>
+
+    {% if round_start_time and round_end_time %}
+    <script>
+        const startTime = new Date("{{ round_start_time|date:'c' }}").getTime();
+        const nowTime = new Date("{{ current_server_time|date:'c' }}").getTime();
+        const duration = Number("{{ round_end_time }}") * 1000;
+
+        let remaining = duration - (nowTime - startTime);
+
+        const timerDiv = document.createElement("div");
+        timerDiv.style.marginTop = "10px";
+        timerDiv.style.fontSize = "18px";
+        timerDiv.style.color = "#ffd700";
+        document.querySelector(".question-container").appendChild(timerDiv);
+
+        const interval = setInterval(() => {
+            if (remaining <= 0) {
+                clearInterval(interval);
+                location.reload();
+                return;
+            }
+
+            timerDiv.innerText = "Time Left: " + Math.floor(remaining / 1000) + "s";
+            remaining -= 1000;
+        }, 1000);
+    </script>
+    {% endif %}
+</body>
+</html>

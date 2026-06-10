@@ -1,0 +1,120 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: #0b0914; /* Deep dark background */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.app-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-over-content {
+    /* display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding-bottom: 50px; */
+    width: 95vw;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-over-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-top: 80px;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(163, 78, 120, 0.2);
+    letter-spacing: 6px;
+}
+
+/* Results Table Container */
+.results-container {
+    width: 90%;
+    max-width: 650px;
+    margin-bottom: 50px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Space between rows if needed, or 0 for clean look */
+}
+
+.results-table thead tr {
+    /* This creates the capsule look for the header */
+    background-color: #1e1b2e;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.results-table th {
+    padding: 20px;
+    color: #a0aec0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    /* Rounding only the outer corners of the header row */
+}
+
+.results-table th:first-child { border-radius: 12px 0 0 12px; text-align: left; }
+.results-table th:last-child { border-radius: 0 12px 12px 0; text-align: right; }
+
+.results-table td {
+    padding: 20px;
+    font-size: 1rem;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.results-table td:last-child {
+    text-align: right;
+}
+
+/* Profit/Loss Color Logic */
+.pos-amount {
+    color: #48bb78; /* Vibrant green */
+    font-weight: bold;
+}
+
+.neg-amount {
+    color: #f56565; /* Vibrant red */
+    font-weight: bold;
+}
+
+/* Go Home Button - Matches the blue glow in the screenshot */
+.go-home-btn {
+    display: inline-block;
+    padding: 12px 60px;
+    background: linear-gradient(180deg, #5fa8e6 0%, #3182ce 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(66, 153, 225, 0.5);
+}
+
+.go-home-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(66, 153, 225, 0.8);
+}

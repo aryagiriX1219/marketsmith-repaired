@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGISTER | Technex '26</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+    <style>
+        /* Targeted fixes to prevent footer overlap */
+        .login-card {
+            max-width: 400px; /* Keeps the box from getting too wide */
+            margin: 0 auto 60px auto; /* 60px bottom margin keeps it above the footer */
+            padding: 25px 35px; /* Compacting the inner padding */
+            background-color: #f8f9fa; /* Assuming this from your image */
+            border-radius: 12px;
+            max-height: 75vh; /* Prevents the box from stretching off-screen */
+            overflow-y: auto; /* Adds a scrollbar inside the box if needed */
+        }
+        .input-field {
+            margin-bottom: 12px; /* Tighter spacing between inputs */
+        }
+        .input-field label {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .login-submit {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-3d-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <img src="{% static 'logo.png' %}" alt="IIT BHU Logo" class="main-logo">
+            <img src="{% static 'logo2.png' %}" alt="Event Logo 2" class="secondary-logo">
+        </div>
+    </header>
+
+    <main class="content-wrapper">
+        <h1 class="hero-title">MARKETSMITH</h1>
+
+        <div class="login-card">
+            <h2 style="text-align:center; color:#1a1a1a; margin-top:0;">Participant Registration</h2>
+            <form method="POST">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="input-field">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="error-prompt" style="display:block; color:red; font-size:0.8rem; margin:2px 0 0 0;">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="login-submit">Register</button>
+            </form>
+            
+            <p style="margin-top: 15px; font-size: 0.9rem; text-align:center; color:#333;">
+                Already registered? <a href="{% url 'login' %}" style="color: #63b3ed;">Login here</a>
+            </p>
+        </div>
+
+        <footer class="single-line-footer">
+            <span class="footer-item">📞 +91 99608 70886 : Akshith</span>
+            <span class="footer-item">📞 +91 79921 79759 : Namish</span>
+            <a href="https://www.technex.in/" target="_blank" class="footer-link">
+                Visit Technex Website
+            </a>
+        </footer>
+    </main>
+</body>
+</html>

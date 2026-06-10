@@ -1,0 +1,210 @@
+:root {
+    /* Darker purple gradient shades */
+    --bg-gradient-light: #2d1354; 
+    --bg-gradient-dark: #0f051d;
+    --accent-yellow: #ffd700;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Left to Right Gradient */
+    background: linear-gradient(to right, var(--bg-gradient-light), var(--bg-gradient-dark));
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* --- 3D ORBS --- */
+.bg-3d-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: float 20s infinite alternate ease-in-out;
+}
+
+.orb-1 { width: 400px; height: 400px; background: #6a3093; top: -10%; left: -5%; }
+.orb-2 { width: 500px; height: 500px; background: #4a2b9d; bottom: -10%; right: -5%; }
+.orb-3 { width: 300px; height: 300px; background: #3a1c71; top: 30%; left: 50%; }
+
+@keyframes float {
+    from { transform: translate(0, 0); }
+    to { transform: translate(40px, 80px); }
+}
+
+/* --- HEADER --- */
+header { padding: 20px 50px; }
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-logo, .secondary-logo {
+    height: 75px;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+/* --- CONTENT --- */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -40px; /* Moves title higher */
+}
+
+.hero-title {
+    font-family: 'Bungee', cursive;
+    font-size: 4.2rem; /* 1.4x larger */
+    color: white;
+    letter-spacing: 4px;
+    margin-bottom: 35px;
+    text-shadow: 0 10px 20px rgba(0,0,0,0.6);
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 40px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    color: #333;
+}
+
+.login-card h2 { margin-bottom: 25px; text-align: center; }
+
+/* --- STYLE DJANGO form.as_p FIELDS --- */
+
+.login-card form p {
+    margin-bottom: 20px;
+}
+
+.login-card form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.login-card form input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
+
+.login-card form input:focus {
+    border-color: #6a3093;
+    box-shadow: 0 0 6px rgba(106, 48, 147, 0.3);
+}
+
+.input-field { margin-bottom: 20px; }
+.input-field label { display: block; margin-bottom: 8px; font-weight: 600; }
+.input-field input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #030303;
+    border-radius: 8px;
+    outline: none;
+}
+
+.login-submit {
+    width: 100%;
+    padding: 15px;
+    background: #1a0b2e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.error-prompt {
+    color: #d90429;
+    background: #fff0f0;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: none;
+    text-align: center;
+}
+
+/* --- FOOTER --- */
+.single-line-footer {
+    position: absolute;
+    bottom: 20px; /* Aligns to the very bottom */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px; /* Space between numbers and link */
+    padding: 10px 0;
+    z-index: 10;
+}
+
+.footer-item, .footer-link {
+    color: #ffffff !important; /* Forces White */
+    font-family: 'Algerian', 'Courier New', serif; /* Algerian Font */ 
+    font-size: 1rem;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.footer-link {
+    border-bottom: 1px solid transparent;
+    transition: 0.3s ease;
+}
+
+.footer-link:hover {
+    border-bottom: 1px solid #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); 
+}
+
+/* Ensure the main wrapper allows space for the fixed footer */
+.content-wrapper {
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Styling for Django Form Inputs */
+input[type="text"], 
+input[type="email"], 
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgb(2, 2, 2);
+    font-family: 'Inter', sans-serif;
+}
+
+input:focus {
+    border-color: #63b3ed;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+}
