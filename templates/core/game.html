@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,39 +8,25 @@
     <link rel="stylesheet" href="{% static 'gameplay.css' %}">
 </head>
 <body>
-    <div class="logo-center-container">
-    <img src="{% static 'logo.png' %}" alt="Quant Club IIT BHU" class="header-logo">
-    </div>
-    <div class="app-container">
-        <div style="
-position:fixed;
-top:10px;
-left:50%;
-transform:translateX(-50%);
-z-index:1000;
-text-align:center;
-">
-    <div style="
-    color:#fbbf24;
-    font-size:28px;
-    font-weight:700;
-    letter-spacing:2px;">
-        QUANTX WEEK 2
+
+    <!-- Fixed top header -->
+    <div class="top-header">
+        <div class="logo-left">
+            <img src="https://i.ibb.co/pvRwZyW0/quant-club-logo.webp" alt="QuantX IIT BHU">
+        </div>
+        <div class="title-center">
+            <div class="main-title">QUANTX WEEK 2</div>
+            <div class="sub-title">Quant Club IIT BHU · Summer Camp</div>
+        </div>
+        <div style="width:60px;"></div>
     </div>
 
-    <div style="
-    color:white;
-    font-size:13px;">
-        Quant Club IIT BHU Summer Camp
-    </div>
-</div>
+    <div class="app-container">
         <div class="left-panel">
+
             <div class="question-container">
-                <h2 id="question-text">
-                    ROUND {{ game.current_round }}
-                </h2>
+                <h2 id="question-text">ROUND {{ game.current_round }}</h2>
             </div>
-            
 
             <div class="table-area">
                 <div class="poker-table">
@@ -60,22 +45,20 @@ text-align:center;
                         {% if p.seat_number == 6 %}player-bottom-left{% endif %}
                     ">
                         {% if p.seat_number == 3 or p.seat_number == 4 or p.seat_number == 5 %}
-                            <!-- For top side players: info first, avatar below -->
                             <div class="player-info">
-                                <div class="player-stats">
-                                    cash: ${{ p.cash }}<br>Assets: {{ p.asset_count }}
-                                </div>
-                                <div class="player-name">{{ p.user.username }}</div>
+                                <div class="player-stats">💰${{ p.cash }} &nbsp; 📦{{ p.asset_count }}</div>
+                                <span class="player-name" title="{{ p.user.username }}">
+                                    {{ p.user.username|truncatechars:14 }}
+                                </span>
                             </div>
                             <div class="player"></div>
                         {% else %}
-                            <!-- For bottom side players: avatar first, info below -->
                             <div class="player"></div>
                             <div class="player-info">
-                                <div class="player-name">{{ p.user.username }}</div>
-                                <div class="player-stats">
-                                    cash: ${{ p.cash }}<br>Assets: {{ p.asset_count }}
-                                </div>
+                                <span class="player-name" title="{{ p.user.username }}">
+                                    {{ p.user.username|truncatechars:14 }}
+                                </span>
+                                <div class="player-stats">💰${{ p.cash }} &nbsp; 📦{{ p.asset_count }}</div>
                             </div>
                         {% endif %}
                     </div>
@@ -83,6 +66,7 @@ text-align:center;
 
                 </div>
             </div>
+
         </div>
 
         <div class="right-panel">
@@ -90,16 +74,16 @@ text-align:center;
             <div class="trading-controls">
             {% else %}
             <div class="trading-controls" style="opacity:0.5; pointer-events:none;">
-                <p style="text-align:center;">Trading Closed</p>
+                <p style="text-align:center; color:#fbbf24; font-weight:700;">Trading Closed</p>
             {% endif %}
                 <input
-                        type="number"
-                        id="price-input"
-                        placeholder="Enter price"
-                        min="1"
-                        step="1"
-                        required
-                    />
+                    type="number"
+                    id="price-input"
+                    placeholder="Enter price"
+                    min="1"
+                    step="1"
+                    required
+                />
                 <div class="action-buttons">
                     <button class="btn buy-btn" onclick="executeTrade('Buy')">Buy</button>
                     <button class="btn sell-btn" onclick="executeTrade('Sell')">Sell</button>
@@ -111,15 +95,14 @@ text-align:center;
                 <div class="data-row header-row">
                     <span>Action</span>
                     <span>Price</span>
-                    <!-- <span>Cancel</span> -->
                 </div>
                 <div class="data-content" id="working-orders-list"></div>
             </div>
-            
+
             <div class="data-section">
                 <div class="section-header">My Trade History</div>
                 <div class="data-row header-row">
-                    <span>Round</span>
+                    <span>Rnd</span>
                     <span>Buyer</span>
                     <span>Seller</span>
                     <span>Price</span>
@@ -127,53 +110,54 @@ text-align:center;
                 <div class="data-content" id="trades-list">
                     {% for trade in trade_log %}
                     <div class="data-row">
-                        <span> ROUND {{ trade.round }}</span>
-                        <span>{{ trade.buyer }}</span>
-                        <span>{{ trade.seller }}</span>
+                        <span>R{{ trade.round }}</span>
+                        <span>{{ trade.buyer|truncatechars:8 }}</span>
+                        <span>{{ trade.seller|truncatechars:8 }}</span>
                         <span>${{ trade.price }}</span>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
+    </div>
 
     {% if show_trade_log_popup %}
     <div style="
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #120e1f;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 999;
-    border: 1px solid #322544;
-    text-align:center;
+        position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(180deg,#111827,#0b1220);
+        padding: 28px 32px;
+        border-radius: 16px;
+        z-index: 999;
+        border: 1px solid rgba(251,191,36,0.3);
+        text-align: center;
+        min-width: 320px;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.6);
     ">
-        <h3>Round Trades</h3>
+        <h3 style="color:#fbbf24; margin-bottom:16px; font-size:1.2rem; letter-spacing:1px;">ROUND TRADES</h3>
         {% if current_round_trades %}
             {% for trade in current_round_trades %}
-                <div>
-                    {{ trade.buyer }} bought from {{ trade.seller }} @ ${{ trade.price }}
+                <div style="color:#e5e7eb; margin:8px 0; font-size:0.95rem;">
+                    <span style="color:#22c55e;">{{ trade.buyer|truncatechars:18 }}</span>
+                    bought from
+                    <span style="color:#ef4444;">{{ trade.seller|truncatechars:18 }}</span>
+                    @ <span style="color:#fbbf24;">${{ trade.price }}</span>
                 </div>
             {% endfor %}
         {% else %}
-            <div>No trades this round</div>
+            <div style="color:#94a3b8;">No trades this round</div>
         {% endif %}
-
-        <p>Next round starting...</p>
+        <p style="margin-top:18px; color:#64748b; font-size:0.85rem;">Next round starting soon...</p>
     </div>
 
     <script>
-    setTimeout(() => {
-        location.reload();
-    }, 10000);
+        setTimeout(() => { location.reload(); }, 10000);
     </script>
     {% endif %}
+
     <script>
         window.currentGameId = "{{ game.id }}";
-        // We use username here because your trade_log likely stores strings, not IDs
-        window.currentUserName = "{{ request.user.username }}"; 
+        window.currentUserName = "{{ request.user.username }}";
     </script>
 
     <script id="trade-data" type="application/json">
@@ -185,28 +169,26 @@ text-align:center;
     {% if round_start_time and round_end_time %}
     <script>
         const startTime = new Date("{{ round_start_time|date:'c' }}").getTime();
-        const nowTime = new Date("{{ current_server_time|date:'c' }}").getTime();
-        const duration = Number("{{ round_end_time }}") * 1000;
-
-        let remaining = duration - (nowTime - startTime);
+        const nowTime   = new Date("{{ current_server_time|date:'c' }}").getTime();
+        const duration  = Number("{{ round_end_time }}") * 1000;
+        let remaining   = duration - (nowTime - startTime);
 
         const timerDiv = document.createElement("div");
-        timerDiv.style.marginTop = "10px";
-        timerDiv.style.fontSize = "18px";
-        timerDiv.style.color = "#ffd700";
+        timerDiv.className = "timer-box";
         document.querySelector(".question-container").appendChild(timerDiv);
 
         const interval = setInterval(() => {
             if (remaining <= 0) {
                 clearInterval(interval);
+                timerDiv.innerText = "Time's up!";
                 location.reload();
                 return;
             }
-
-            timerDiv.innerText = "Time Left: " + Math.floor(remaining / 1000) + "s";
+            timerDiv.innerText = "⏱ Time Left: " + Math.ceil(remaining / 1000) + "s";
             remaining -= 1000;
         }, 1000);
     </script>
     {% endif %}
+
 </body>
 </html>
