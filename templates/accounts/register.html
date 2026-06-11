@@ -1,93 +1,150 @@
 {% load static %}
+
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REGISTER | Technex '26</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'login.css' %}">
-    <style>
-        /* Targeted fixes to prevent footer overlap */
-        .login-card {
-            max-width: 400px; /* Keeps the box from getting too wide */
-            margin: 0 auto 60px auto; /* 60px bottom margin keeps it above the footer */
-            padding: 25px 35px; /* Compacting the inner padding */
-            background-color: #f8f9fa; /* Assuming this from your image */
-            border-radius: 12px;
-            max-height: 75vh; /* Prevents the box from stretching off-screen */
-            overflow-y: auto; /* Adds a scrollbar inside the box if needed */
-        }
-        .input-field {
-            margin-bottom: 12px; /* Tighter spacing between inputs */
-        }
-        .input-field label {
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-        .input-field input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            box-sizing: border-box;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-        .login-submit {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 6px;
-        }
-    </style>
+    <title>Register | QuantX Week 2</title>
+
+```
+<link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'login.css' %}">
+
+<style>
+    .login-card {
+        max-width: 450px;
+        margin: 0 auto 60px auto;
+        padding: 30px 35px;
+        background: rgba(255,255,255,0.97);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .input-field {
+        margin-bottom: 14px;
+    }
+
+    .input-field label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .input-field input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .login-submit {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #fbbf24;
+        color: #0f172a;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .login-submit:hover {
+        transform: translateY(-2px);
+    }
+
+    .event-subtitle {
+        text-align: center;
+        color: white;
+        font-size: 1.1rem;
+        margin-top: -10px;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+</style>
+```
+
 </head>
+
 <body>
-    <div class="bg-3d-container">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
+
+```
+<div class="bg-3d-container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<header>
+    <div class="header-content">
+        <img src="{% static 'logo.png' %}" alt="Quant Club IIT BHU" class="main-logo">
+    </div>
+</header>
+
+<main class="content-wrapper">
+
+    <h1 class="hero-title">QUANTX</h1>
+
+    <div class="event-subtitle">
+        Quant Club IIT BHU • Summer Camp Week 2
     </div>
 
-    <header>
-        <div class="header-content">
-            <img src="{% static 'logo.png' %}" alt="IIT BHU Logo" class="main-logo">
-            <img src="{% static 'logo2.png' %}" alt="Event Logo 2" class="secondary-logo">
-        </div>
-    </header>
+    <div class="login-card">
 
-    <main class="content-wrapper">
-        <h1 class="hero-title">MARKETSMITH</h1>
+        <h2 style="text-align:center;color:#0f172a;margin-top:0;">
+            Participant Registration
+        </h2>
 
-        <div class="login-card">
-            <h2 style="text-align:center; color:#1a1a1a; margin-top:0;">Participant Registration</h2>
-            <form method="POST">
-                {% csrf_token %}
-                
-                {% for field in form %}
-                <div class="input-field">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <p class="error-prompt" style="display:block; color:red; font-size:0.8rem; margin:2px 0 0 0;">{{ field.errors.0 }}</p>
-                    {% endif %}
-                </div>
-                {% endfor %}
+        <form method="POST">
+            {% csrf_token %}
 
-                <button type="submit" class="login-submit">Register</button>
-            </form>
-            
-            <p style="margin-top: 15px; font-size: 0.9rem; text-align:center; color:#333;">
-                Already registered? <a href="{% url 'login' %}" style="color: #63b3ed;">Login here</a>
-            </p>
-        </div>
+            {% for field in form %}
+            <div class="input-field">
+                <label>{{ field.label }}</label>
+                {{ field }}
 
-        <footer class="single-line-footer">
-            <span class="footer-item">📞 +91 99608 70886 : Akshith</span>
-            <span class="footer-item">📞 +91 79921 79759 : Namish</span>
-            <a href="https://www.technex.in/" target="_blank" class="footer-link">
-                Visit Technex Website
+                {% if field.errors %}
+                <p style="display:block;color:red;font-size:0.8rem;margin-top:4px;">
+                    {{ field.errors.0 }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="login-submit">
+                Register for QuantX
+            </button>
+        </form>
+
+        <p style="margin-top:15px;font-size:0.9rem;text-align:center;color:#333;">
+            Already registered?
+            <a href="{% url 'login' %}" style="color:#2563eb;">
+                Login here
             </a>
-        </footer>
-    </main>
+        </p>
+
+    </div>
+
+    <footer class="single-line-footer">
+        <span class="footer-item">
+            Quant Club IIT BHU
+        </span>
+
+        <span class="footer-item">
+            QuantX Week 2 Trading Competition
+        </span>
+    </footer>
+
+</main>
+```
+
 </body>
 </html>
