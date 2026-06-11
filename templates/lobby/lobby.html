@@ -1,88 +1,150 @@
-cat > /home/claude/quantx/templates/lobby/lobby.html << 'EOF'
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lobby | MARKETSMITH · QuantX</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Lobby | MARKETSMITH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <style>
+    /* Logout Pop-up Styles */
     #logout-overlay {
-        display: none;
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: rgba(13, 6, 20, 0.95);
-        z-index: 9999;
-        flex-direction: column; align-items: center; justify-content: center;
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(13, 6, 20, 0.95); /* Deep dark purple blur */
+        z-index: 9999; /* Stays on top of everything */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
-    .logout-text { color: #ffd700; font-family: 'Lora', serif; font-size: 2rem; font-weight: bold; letter-spacing: 2px; animation: pulse 1.5s infinite; }
-    .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #ffd700; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+
+    .logout-text {
+        color: #fce34d; /* Technex Gold */
+        font-family: 'Lora', serif;
+        font-size: 2rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top: 4px solid #fce34d;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.7; } 100% { opacity:1; } }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+</style>
 
-    .profile-table-fixed { width: 100%; max-width: 600px; margin: 40px auto; border-collapse: collapse; background-color: #1a0f2e; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
-    .profile-table-fixed th, .profile-table-fixed td { padding: 25px 30px; text-align: left; border-bottom: 2px solid #3d2b56; font-size: 1.3rem; }
-    .profile-table-fixed th { color: #ffd700; font-weight: 800; width: 45%; letter-spacing: 1px; }
-    .profile-table-fixed td { color: #ffffff; font-weight: 700; font-family: monospace; font-size: 1.4rem; }
-    .profile-table-fixed tr:last-child th, .profile-table-fixed tr:last-child td { border-bottom: none; }
-
-    .quantx-header-brand {
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        color: #ffd700; font-family: 'Inter', sans-serif;
-    }
-    .quantx-header-brand .brand-main { font-size: 1.1rem; font-weight: 800; letter-spacing: 3px; }
-    .quantx-header-brand .brand-sub { font-size: 0.65rem; letter-spacing: 1px; opacity: 0.75; margin-top: 2px; }
-    </style>
-    <script>
+<script>
     function handleLogout(event) {
-        event.preventDefault();
+        // 1. Stop the form from submitting instantly
+        event.preventDefault(); 
+        
+        // 2. Show the fancy pop-up overlay
         document.getElementById('logout-overlay').style.display = 'flex';
-        setTimeout(function() { document.getElementById('logout-form').submit(); }, 2000);
+        
+        // 3. Wait exactly 2 seconds (2000 milliseconds), then submit to backend
+        setTimeout(function() {
+            document.getElementById('logout-form').submit();
+        }, 2000);
     }
-    </script>
+</script>
+    <style>
+    /* Upgraded Profile Table Styling */
+    .profile-table-fixed {
+        width: 100%;
+        max-width: 600px;
+        margin: 40px auto;
+        border-collapse: collapse;
+        background-color: #1a0f2e; /* Matches your dark panel aesthetic */
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+    
+    .profile-table-fixed th, 
+    .profile-table-fixed td {
+        padding: 25px 30px; /* Large spacing */
+        text-align: left;
+        border-bottom: 2px solid #3d2b56;
+        font-size: 1.3rem; /* Much larger font */
+    }
+    
+    .profile-table-fixed th {
+        color: #fce34d; /* Technex Gold */
+        font-weight: 800; /* Extra bold headers */
+        width: 45%;
+        letter-spacing: 1px;
+    }
+    
+    .profile-table-fixed td {
+        color: #ffffff;
+        font-weight: 700; /* Bold values */
+        font-family: monospace; /* Gives it a data/tech feel */
+        font-size: 1.4rem;
+    }
+
+    /* Remove border from the last row */
+    .profile-table-fixed tr:last-child th,
+    .profile-table-fixed tr:last-child td {
+        border-bottom: none;
+    }
+</style>
 </head>
 <body class="lobby-page-bg">
     <header class="cf-header">
         <div class="header-inner">
-            <img src="https://i.ibb.co/pvRwZyW0/quant-club-logo.webp" alt="QuantX IIT BHU" class="header-logo">
-            <div class="quantx-header-brand">
-                <span class="brand-main">MARKETSMITH</span>
-                <span class="brand-sub">QuantX Week 2 · IIT BHU Quant Club</span>
-            </div>
+            <img src="{% static 'logo.png' %}" alt="Technex" class="header-logo">
             <nav class="cf-tabs">
                 <button class="tab-link active" onclick="switchTab(event, 'leaderboard')">LEADERBOARD</button>
                 <button class="tab-link" onclick="switchTab(event, 'rules')">HOW TO PLAY</button>
                 <button class="tab-link" onclick="switchTab(event, 'profile')">PROFILE</button>
+
                 {% if not user.is_authenticated %}
-                    <a href="{% url 'login' %}" class="tab-link login-link">LOGIN</a>
-                {% else %}
-                    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:inline;" onsubmit="handleLogout(event)">
-                        {% csrf_token %}
-                        <button type="submit" class="tab-link">LOGOUT</button>
-                    </form>
-                {% endif %}
+    <a href="{% url 'login' %}" class="tab-link login-link">LOGIN</a>
+{% else %}
+    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:inline;" onsubmit="handleLogout(event)">
+        {% csrf_token %}
+        <button type="submit" class="tab-link">LOGOUT</button>
+    </form>
+{% endif %}
             </nav>
+            <img src="{% static 'logo2.png' %}" alt="SNC" class="header-logo">
         </div>
     </header>
-
-    <div id="logout-overlay">
-        <div class="spinner"></div>
-        <div class="logout-text">Logging you out...</div>
-    </div>
-
+<div id="logout-overlay">
+    <div class="spinner"></div>
+    <div class="logout-text">Logging you out...</div>
+</div>
     <main class="dashboard-content">
         <section id="leaderboard" class="tab-pane active">
             <div class="view-header">
                 <h3>Live Market Rankings</h3>
                 <form method="POST" action="{% url 'matchmaking' %}">
                     {% csrf_token %}
-                    <button type="submit" class="join-btn">START MATCHMAKING</button>
+                    <button type="submit" class="join-btn">
+                        START MATCHMAKING
+                    </button>
                 </form>
             </div>
             <table class="market-table">
                 <thead>
-                    <tr><th>RANK</th><th>PARTICIPANT</th><th>TOTAL PNL</th></tr>
+                    <tr>
+                        <th>RANK</th>
+                        <th>PARTICIPANT</th>
+                        <th>TOTAL PNL</th>
+                    </tr>
                 </thead>
                 <tbody id="leaderboard-body">
                     {% if leaderboard %}
@@ -94,7 +156,9 @@ cat > /home/claude/quantx/templates/lobby/lobby.html << 'EOF'
                             </tr>
                         {% endfor %}
                     {% else %}
-                        <tr><td colspan="3" style="text-align:center;">Login to see leaderboard...</td></tr>
+                        <tr>
+                            <td colspan="3" style="text-align:center;">Login to see leaderboard...</td>
+                        </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -142,7 +206,7 @@ cat > /home/claude/quantx/templates/lobby/lobby.html << 'EOF'
                     <li>Trades will be executed at the ask price.</li>
                     <li>Orders are matched from best bid and best ask outward.</li>
                     <li>In case of a tie, the player booking the order first will be given priority.</li>
-                    <li>No money is kept by the dealer (sum of all players' PnL is always zero).</li>
+                    <li>No money is kept by the dealer (sum of all players’ PnL is always zero).</li>
                 </ul>
                 <h4>End of Round</h4>
                 <ul>
@@ -154,27 +218,45 @@ cat > /home/claude/quantx/templates/lobby/lobby.html << 'EOF'
         </section>
 
         <section id="profile" class="tab-pane">
-            <div class="view-header">
-                <h3 style="text-align:center; width:100%;">Participant Data</h3>
-            </div>
-            {% if user.is_authenticated %}
-                <table class="profile-table-fixed">
-                    <tr><th>PARTICIPANT NAME</th><td>{{ user.username }}</td></tr>
-                    <tr>
-                        <th>CURRENT PNL</th>
-                        <td id="profile-pnl" style="color: {% if total_pnl > 0 %}#4caf50{% elif total_pnl < 0 %}#f44336{% else %}#ffffff{% endif %};">
-                            {{ total_pnl }}
-                        </td>
-                    </tr>
-                </table>
-            {% else %}
-                <p style="text-align:center; font-size:1.2rem; color:#fff;">Please login to view your profile data.</p>
-            {% endif %}
-        </section>
+    <div class="view-header">
+        <h3 style="text-align: center; width: 100%;">Participant Data</h3>
+    </div>
+    
+    {% if user.is_authenticated %}
+        <table class="profile-table-fixed">
+            <tr>
+                <th>PARTICIPANT NAME</th>
+                <td>{{ user.username }}</td>
+            </tr>
+            <!-- <tr>
+                <th>TECHNEX ID</th>
+                <td>
+                    {% if user.profile.techhnex_id %}
+                        {{ user.profile.techhnex_id }}
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </td>
+            </tr> -->
+            <tr>
+                <th>CURRENT PNL</th>
+                <td id="profile-pnl" style="color: {% if total_pnl > 0 %}#4caf50{% elif total_pnl < 0 %}#f44336{% else %}#ffffff{% endif %};">
+                    {{ total_pnl }}
+                </td>
+            </tr>
+        </table>
+    {% else %}
+        <p style="text-align: center; font-size: 1.2rem; color: #fff;">Please login to view your profile data.</p>
+    {% endif %}
+</section>
     </main>
 
     <footer class="single-line-footer">
-        <span class="foot-link">QuantX Week 2 · IIT BHU Quant Club · Summer Camp 2026</span>
+        <span class="footer-item">📞 +91 99608 70886 : Akshith</span>
+            <span class="footer-item">📞 +91 79921 79759 : Namish</span>
+            <a href="https://www.technex.in/" target="_blank" class="footer-link">
+                Visit Technex Website
+            </a>
     </footer>
 
     <script>
@@ -185,5 +267,3 @@ cat > /home/claude/quantx/templates/lobby/lobby.html << 'EOF'
     <script>window.onload = initLobby;</script>
 </body>
 </html>
-EOF
-echo "lobby.html done"
