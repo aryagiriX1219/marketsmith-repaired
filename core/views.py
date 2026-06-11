@@ -112,29 +112,23 @@ def matchmaking(request):
     # 6️⃣ Broadcast updated player count
     player_count = open_game.players.count()
 
-    try:
-        async_to_sync(get_channel_layer().group_send)(
-            f"waiting_{open_game.id}",
-            {
-                "type": "player_joined",
-                "player_count": player_count
-            }
-        )
-    except Exception:
-        pass
+    async_to_sync(get_channel_layer().group_send)(
+        f"waiting_{open_game.id}",
+        {
+            "type": "player_joined",
+            "player_count": player_count
+        }
+    )
 
     # 7️⃣ Start game if full
     if player_count == 6:
         open_game.initialize_game()
         open_game.is_active = True
         open_game.save()
-        try:
-            async_to_sync(get_channel_layer().group_send)(
-                f"waiting_{open_game.id}",
-                {"type": "game_started"}
-            )
-        except Exception:
-            pass
+        async_to_sync(get_channel_layer().group_send)(
+            f"waiting_{open_game.id}",
+            {"type": "game_started"}
+        )
         return redirect('game_interface', game_id=open_game.id)
 
     # 8️⃣ Otherwise stay in waiting room
