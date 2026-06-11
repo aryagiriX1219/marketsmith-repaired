@@ -30,13 +30,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "marketsmith.up.railway.app",   # your actual Railway domain
+    "marketsmith-repaired-production.up.railway.app",
     "127.0.0.1",
     "localhost"
 ]
-CSRF_TRUSTED_ORIGINS = [
-    "https://marketsmith.up.railway.app",
-]
+
 
 
 # Application definition
@@ -63,7 +61,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://marketsmith.onrender.com",
+    "https://marketsmith-repaired-production.up.railway.app",
 ]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
