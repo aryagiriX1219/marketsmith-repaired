@@ -502,7 +502,10 @@ def api_place_order(request):
         'message': 'Order placed. Waiting for match.'
     })
 
+@login_required
 def view_player_info(request):
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
     users = list(
         User.objects.all().values(
             "id",
