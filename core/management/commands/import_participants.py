@@ -3,80 +3,78 @@ from django.contrib.auth.models import User
 import pandas as pd
 import re
 
+
 class Command(BaseCommand):
-help = "Import QuantX participants"
+    help = "Import QuantX participants"
 
-```
-def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):
 
-    files = [
-        "participants1.xlsx",
-        "participants2.xlsx",
-    ]
+        files = [
+            "participants1.xlsx",
+            "participants2.xlsx",
+        ]
 
-    created = 0
+        created = 0
 
-    for file in files:
+        for file in files:
 
-        df = pd.read_excel(file)
+            df = pd.read_excel(file)
 
-        for _, row in df.iterrows():
+            for _, row in df.iterrows():
 
-            try:
-                name = str(row["Name"]).strip()
+                try:
+                    name = str(row["Name"]).strip()
 
-                roll = str(row["Roll No."]).strip()
+                    email = str(row["Email"]).strip().lower()
 
-                phone = re.sub(
-                    r"\\D",
-                    "",
-                    str(row["Phone Number"])
-                )
-
-                if (
-                    not roll
-                    or roll == "nan"
-                    or len(phone) < 4
-                ):
-                    continue
-
-                username = roll
-
-                clean_name = "".join(
-                    name.lower().split()
-                )
-
-                password = (
-                    clean_name[:4]
-                    + phone[-4:]
-                )
-
-                email = ""
-
-                if "Email" in row:
-                    email = str(
-                        row["Email"]
-                    ).strip()
-
-                if not User.objects.filter(
-                    username=username
-                ).exists():
-
-                    User.objects.create_user(
-                        username=username,
-                        password=password,
-                        first_name=name,
-                        email=email,
+                    phone = re.sub(
+                        r"\D",
+                        "",
+                        str(row["Phone Number"])
                     )
 
-                    created += 1
+                    if (
+                        not email
+                        or email == "nan"
+                        or len(phone) < 4
+                    ):
+                        continue
 
-            except Exception as e:
-                print(e)
+                    username = email
 
-    self.stdout.write(
-        self.style.SUCCESS(
-            f"Created {created} users"
+                    clean_name = "".join(
+                        name.lower().split()
+                    )
+
+                    password = (
+                        clean_name[:4]
+                        + phone[-4:]
+                    )
+
+                    if not User.objects.filter(
+                        username=username
+                    ).exists():
+
+                        User.objects.create_user(
+                            username=username,
+                            email=email,
+                            password=password,
+                            first_name=name,
+                        )
+
+                        created += 1
+
+                        self.stdout.write(
+                            f"Created: {email} | Password: {password}"
+                        )
+
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.ERROR(str(e))
+                    )
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Created {created} users"
+            )
         )
-    )
-```
