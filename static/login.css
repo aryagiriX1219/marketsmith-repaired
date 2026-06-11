@@ -17,7 +17,8 @@ box-sizing:border-box;
 body{
 background:linear-gradient(135deg,#0f172a,#1e293b);
 min-height:100vh;
-overflow:hidden;
+overflow-y:auto;
+overflow-x:hidden;
 position:relative;
 color:white;
 font-family:'Segoe UI',sans-serif;
@@ -95,8 +96,10 @@ display:none;
 }
 
 /* Main */
-.content-wrapper{
-height:calc(100vh - 100px);
+.content-wrapper {
+    min-height: calc(100vh - 100px);
+    padding: 40px 20px 120px;
+
 
 ```
 display:flex;
@@ -238,6 +241,10 @@ letter-spacing:0.5px;
 }
 
 .footer-link:hover
+
+.login-card {
+    margin-bottom: 80px;
+}
 
 /* Global inputs */
 input[type="text"],
