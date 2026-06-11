@@ -105,7 +105,14 @@
         <form method="POST">
             {% csrf_token %}
             {{ form.non_field_errors }}
-            {{ form.as_p }}
+<p>
+    <label for="id_username">Email</label>
+    <input type="email" name="username" id="id_username" autofocus autocomplete="email" required>
+</p>
+<p>
+    <label for="id_password">Password</label>
+    <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+</p>
 
             <button type="submit" class="login-submit">
                 Login to QuantX
