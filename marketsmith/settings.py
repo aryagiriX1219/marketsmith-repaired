@@ -140,6 +140,10 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
+AUTHENTICATION_BACKENDS = [
+    'core.backends.EmailBackend',
+]
+
 
 
 
