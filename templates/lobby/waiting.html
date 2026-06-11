@@ -1,87 +1,73 @@
-cat > /home/claude/quantx/templates/lobby/waiting.html << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waiting Room | MARKETSMITH · QuantX</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Waiting Room | MARKETSMITH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: linear-gradient(135deg, #0f051d 0%, #1a0b2e 50%, #0f051d 100%);
+            background-color: #0b0510; /* Deep dark purple base */
             color: #ffffff;
             font-family: 'PT Sans', sans-serif;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
         }
-        .brand-top {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 40px;
-        }
-        .brand-top img { height: 48px; }
-        .brand-top .brand-text { font-family: 'Inter', sans-serif; }
-        .brand-top .brand-text .main { font-size: 1.1rem; font-weight: 800; color: #ffd700; letter-spacing: 3px; }
-        .brand-top .brand-text .sub { font-size: 0.7rem; color: rgba(255,255,255,0.6); letter-spacing: 1px; }
-
         .waiting-box {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,215,0,0.25);
-            border-radius: 16px;
+            background-color: #180d29; /* Slightly lighter purple for the card */
+            border: 2px solid #3d2b56;
+            border-radius: 8px;
             padding: 50px 60px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-            min-width: 380px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         h1 {
-            color: #ffd700;
+            color: #fce34d; /* Yellow accent matching your Start button */
             font-family: 'Lora', serif;
-            margin-bottom: 24px;
-            font-size: 1.9rem;
-            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
-        p { font-size: 1.1rem; margin: 12px 0; color: rgba(255,255,255,0.85); }
-        .highlight { color: #ffd700; font-weight: 700; }
+        p {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+        .highlight {
+            color: #fce34d;
+            font-weight: 700;
+        }
         .count-display {
-            font-size: 1.4rem;
-            background: rgba(255,215,0,0.08);
-            border: 1px solid rgba(255,215,0,0.3);
-            padding: 18px 35px;
-            border-radius: 10px;
+            font-size: 1.5rem;
+            background-color: #261642;
+            padding: 15px 30px;
+            border-radius: 5px;
             display: inline-block;
-            margin-top: 24px;
+            margin-top: 20px;
+            border: 1px solid #4a3074;
         }
-        .pulse { animation: pulse-anim 2s infinite; }
-        @keyframes pulse-anim { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
-
-        .dots::after {
-            content: '';
-            animation: dots 1.5s steps(3, end) infinite;
+        /* A simple pulsing animation to show it's "loading" */
+        .pulse {
+            animation: pulse-animation 2s infinite;
         }
-        @keyframes dots { 0% { content: ''; } 33% { content: '.'; } 66% { content: '..'; } 100% { content: '...'; } }
+        @keyframes pulse-animation {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="brand-top">
-        <img src="https://i.ibb.co/pvRwZyW0/quant-club-logo.webp" alt="QuantX IIT BHU">
-        <div class="brand-text">
-            <div class="main">MARKETSMITH</div>
-            <div class="sub">QuantX Week 2 · IIT BHU Quant Club</div>
-        </div>
-    </div>
 
     <div class="waiting-box">
-        <h1 class="pulse">Connecting to Market<span class="dots"></span></h1>
-
+        <h1 class="pulse">Connecting to Market...</h1>
+        
         <p><strong>Your Assigned Seat:</strong> <span class="highlight">{{ player.seat_number }}</span></p>
-
+        
         <div class="count-display">
-            Players Joined:<br>
+            Players Joined: <br>
             <span id="player-count" class="highlight">{{ player_count }}</span> / {{ max_players }}
         </div>
     </div>
@@ -91,26 +77,32 @@ cat > /home/claude/quantx/templates/lobby/waiting.html << 'EOF'
         const maxPlayers = {{ max_players }};
 
         const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-        const socket = new WebSocket(protocol + window.location.host + "/ws/waiting/" + gameId + "/");
+        const socket = new WebSocket(
+            protocol + window.location.host + "/ws/waiting/" + gameId + "/"
+        );
 
-        socket.onmessage = function(event) {
+        socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
+
+            // Update player count live
             if (data.type === "player_joined") {
                 document.getElementById("player-count").innerText = data.player_count;
+
+                // Safety redirect if count hits max
                 if (data.player_count >= maxPlayers) {
                     window.location.href = "/game/" + gameId + "/";
                 }
             }
+
+            // Direct redirect event triggered by your backend views.py
             if (data.type === "game_started") {
                 window.location.href = "/game/" + gameId + "/";
             }
         };
 
-        socket.onerror = function() {
-            console.error("WebSocket connection error.");
+        socket.onerror = function () {
+            console.error("WebSocket connection error. Make sure your ASGI server is running.");
         };
     </script>
 </body>
 </html>
-EOF
-echo "waiting.html done"
