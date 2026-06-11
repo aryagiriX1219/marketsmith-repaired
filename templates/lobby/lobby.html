@@ -24,7 +24,7 @@
     }
 
     .logout-text {
-        color: #fce34d; /* Technex Gold */
+        color: #fbbf24; /* QuantX Gold */
         font-family: 'Lora', serif;
         font-size: 2rem;
         font-weight: bold;
@@ -82,7 +82,7 @@
     }
     
     .profile-table-fixed th {
-        color: #fce34d; /* Technex Gold */
+        color: #fce34d; /* QuantX Gold */
         font-weight: 800; /* Extra bold headers */
         width: 45%;
         letter-spacing: 1px;
@@ -105,7 +105,7 @@
 <body class="lobby-page-bg">
     <header class="cf-header">
         <div class="header-inner">
-            <img src="{% static 'logo.png' %}" alt="Technex" class="header-logo">
+            <img src="{% static 'logo.png' %}" alt="Quant Club IIT BHU" class="header-logo">
             <nav class="cf-tabs">
                 <button class="tab-link active" onclick="switchTab(event, 'leaderboard')">LEADERBOARD</button>
                 <button class="tab-link" onclick="switchTab(event, 'rules')">HOW TO PLAY</button>
@@ -134,7 +134,7 @@
                 <form method="POST" action="{% url 'matchmaking' %}">
                     {% csrf_token %}
                     <button type="submit" class="join-btn">
-                        START MATCHMAKING
+                        ENTER TRADING ARENA
                     </button>
                 </form>
             </div>
@@ -166,7 +166,7 @@
         </section>
 
         <section id="rules" class="tab-pane">
-            <div class="view-header"><h3>Game Protocol</h3></div>
+            <div class="view-header"><h3>QuantX Trading Rules</h3></div>
             <div class="manual-container">
                 <h4>Interface</h4>
                 <ul>
@@ -219,7 +219,7 @@
 
         <section id="profile" class="tab-pane">
     <div class="view-header">
-        <h3 style="text-align: center; width: 100%;">Participant Data</h3>
+        <h3 style="text-align: center; width: 100%;">QuantX Participant Profile</h3>
     </div>
     
     {% if user.is_authenticated %}
@@ -229,7 +229,7 @@
                 <td>{{ user.username }}</td>
             </tr>
             <!-- <tr>
-                <th>TECHNEX ID</th>
+                <th>QuantX ID</th>
                 <td>
                     {% if user.profile.techhnex_id %}
                         {{ user.profile.techhnex_id }}
@@ -252,12 +252,18 @@
     </main>
 
     <footer class="single-line-footer">
-        <span class="footer-item">📞 +91 99608 70886 : Akshith</span>
-            <span class="footer-item">📞 +91 79921 79759 : Namish</span>
-            <a href="https://www.technex.in/" target="_blank" class="footer-link">
-                Visit Technex Website
-            </a>
-    </footer>
+    <span class="footer-item">
+        Quant Club IIT BHU
+    </span>
+
+    <span class="footer-item">
+        QuantX Week 2 Trading Competition
+    </span>
+
+    <span class="footer-item">
+        Summer Camp 2026
+    </span>
+</footer>
 
     <script>
         const gameId = "{{ game_id|default:'' }}";
