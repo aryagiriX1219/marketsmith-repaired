@@ -1,124 +1,226 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Final Leaderboard | MarketSmith</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #0b0510; /* Deep dark purple */
-            color: #ffffff;
-            font-family: 'PT Sans', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .leaderboard-container {
-            background-color: #1a0f2e;
-            border: 2px solid #3d2b56;
-            border-radius: 12px;
-            padding: 40px;
-            width: 80%;
-            max-width: 800px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-        }
-        h2 {
-            color: #fce34d; /* Technex Gold */
-            font-family: 'Lora', serif;
-            text-align: center;
-            font-size: 2.5rem;
-            margin-top: 0;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid #3d2b56;
-            font-size: 1.2rem;
-        }
-        th {
-            color: #aaa;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        /* Highlight colors for PnL */
-        .pnl-positive { color: #4caf50; font-weight: bold; }
-        .pnl-negative { color: #f44336; font-weight: bold; }
-        .pnl-zero { color: #ffffff; font-weight: bold; }
-        
-        .redirect-msg {
-            margin-top: 35px;
-            text-align: center;
-            color: #888;
-            font-size: 1.1rem;
-        }
-        .countdown {
-            color: #fce34d;
-            font-weight: bold;
-            font-size: 1.3rem;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantX Week 2 Leaderboard</title>
+
+```
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(135deg,#0f172a,#1e293b);
+        color: white;
+        font-family: 'PT Sans', sans-serif;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+    }
+
+    .leaderboard-container {
+        width: 90%;
+        max-width: 1000px;
+
+        background: rgba(255,255,255,0.06);
+        backdrop-filter: blur(12px);
+
+        border-radius: 20px;
+        padding: 40px;
+
+        box-shadow: 0 15px 50px rgba(0,0,0,0.35);
+    }
+
+    .brand {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #fbbf24;
+        font-size: 2.8rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #cbd5e1;
+        margin-bottom: 30px;
+        font-size: 1rem;
+    }
+
+    h2 {
+        text-align: center;
+        color: #ffffff;
+        font-family: 'Lora', serif;
+        margin-bottom: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: rgba(255,255,255,0.08);
+        color: #fbbf24;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    th,
+    td {
+        padding: 14px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    tr:hover {
+        background: rgba(255,255,255,0.05);
+    }
+
+    .pnl-positive {
+        color: #22c55e;
+        font-weight: bold;
+    }
+
+    .pnl-negative {
+        color: #ef4444;
+        font-weight: bold;
+    }
+
+    .pnl-zero {
+        color: white;
+        font-weight: bold;
+    }
+
+    .redirect-msg {
+        margin-top: 30px;
+        text-align: center;
+        color: #cbd5e1;
+    }
+
+    .countdown {
+        color: #fbbf24;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .winner-banner {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #fbbf24;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+</style>
+```
+
 </head>
+
 <body>
 
-    <div class="leaderboard-container">
-        <h2>Final Standings</h2>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Seat</th>
-                    <th>Cash</th>
-                    <th>Assets</th>
-                    <th>Net PnL</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in players %}
-                <tr>
-                    <td>#{{ forloop.counter }}</td>
-                    <td><strong>{{ p.username }}</strong></td>
-                    <td>{{ p.seat }}</td>
-                    <td>${{ p.cash }}</td>
-                    <td>{{ p.assets }}</td>
-                    <td class="{% if p.net_pnl > 0 %}pnl-positive{% elif p.net_pnl < 0 %}pnl-negative{% else %}pnl-zero{% endif %}">
-                        ${{ p.net_pnl }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+```
+<div class="leaderboard-container">
 
-        <div class="redirect-msg">
-            Redirecting to Lobby in <span id="countdown" class="countdown">{{ remaining_time }}</span> seconds...
-        </div>
+    <div class="brand">
+        QUANTX
     </div>
 
-    <script>
-        let timeLeft = parseInt("{{ remaining_time }}", 10);
-        const countdownEl = document.getElementById("countdown");
+    <div class="subtitle">
+        Quant Club IIT BHU • Summer Camp Week 2
+    </div>
 
-        const interval = setInterval(() => {
-            timeLeft--;
-            countdownEl.innerText = timeLeft;
+    <h2>Final Leaderboard</h2>
 
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                window.location.href = "/cleanup/{{ game.id }}/";
-            }
-        }, 1000);
-    </script>
+    <div class="winner-banner">
+        Top Traders of the Round
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Participant</th>
+                <th>Seat</th>
+                <th>Cash</th>
+                <th>Assets</th>
+                <th>Net PnL</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for p in players %}
+            <tr>
+
+                <td>
+                    #{{ forloop.counter }}
+                </td>
+
+                <td>
+                    <strong>{{ p.username }}</strong>
+                </td>
+
+                <td>
+                    {{ p.seat }}
+                </td>
+
+                <td>
+                    ${{ p.cash }}
+                </td>
+
+                <td>
+                    {{ p.assets }}
+                </td>
+
+                <td class="{% if p.net_pnl > 0 %}pnl-positive{% elif p.net_pnl < 0 %}pnl-negative{% else %}pnl-zero{% endif %}">
+                    ${{ p.net_pnl }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="redirect-msg">
+        Returning to Lobby in
+        <span id="countdown" class="countdown">
+            {{ remaining_time }}
+        </span>
+        seconds...
+    </div>
+
+</div>
+
+<script>
+    let timeLeft = parseInt("{{ remaining_time }}", 10);
+
+    const countdownEl =
+        document.getElementById("countdown");
+
+    const interval = setInterval(() => {
+
+        timeLeft--;
+
+        countdownEl.innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+
+            clearInterval(interval);
+
+            window.location.href =
+                "/cleanup/{{ game.id }}/";
+        }
+
+    }, 1000);
+</script>
+```
 
 </body>
 </html>
