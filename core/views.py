@@ -10,43 +10,31 @@ from .models import GameSession, Player, Order, Transaction
 from channels.layers import get_channel_layer
 from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
-from django.shortcuts import get_object_or_404, redirect
 from core.models import Profile
 import pandas as pd
 from django.contrib.auth.models import User
 from django.conf import settings
 
+
 @csrf_exempt
 def cron_ping(request):
-    return HttpResponse(status = 204)
+    return HttpResponse(status=204)
+
 
 @login_required
 def cleanup_game(request, game_id):
     game = GameSession.objects.filter(id=game_id).first()
-
     if not game:
         return redirect("home")
-
     if game.is_finished:
         game.delete()
-
     return redirect("home")
 
 
-
 def home(request):
-    """
-    Home / Lobby.
-    If user is already assigned to a game, force redirect.
-    """
-
-    # 🚫 If not logged in → just show lobby
     if not request.user.is_authenticated:
-        return render(request, 'lobby/lobby.html', {
-            'assigned': False
-        })
+        return render(request, 'lobby/lobby.html', {'assigned': False})
 
-    # ✅ Logged-in logic
     existing_player = Player.objects.filter(
         user=request.user,
         game__is_active=False,
@@ -56,44 +44,24 @@ def home(request):
     if existing_player:
         return redirect('waiting_room', game_id=existing_player.game.id)
 
-    if existing_player:
-        return redirect('game_interface', game_id=existing_player.game.id)
-
-    existing_player = Player.objects.filter(
-        user=request.user,
-        game__is_active=False
-    ).first()
-
-    if existing_player:
-        return redirect('waiting_room', game_id=existing_player.game.id)
-
     profile = Profile.objects.filter(user=request.user).first()
-
     total_pnl = profile.total_pnl if profile else 0
-
     leaderboard = Profile.objects.values('user__username', 'total_pnl').order_by('-total_pnl')[:50]
 
-    return render(request, "lobby/lobby.html",{
+    return render(request, "lobby/lobby.html", {
         "total_pnl": total_pnl,
-        "leaderboard": leaderboard  # 2. Pass it to the template
+        "leaderboard": leaderboard
     })
 
 
 # ============================================================
-# === VIEW: MATCHMAKING ENTRY POINT (CORE LOGIC) ==============
+# === VIEW: MATCHMAKING ======================================
 # ============================================================
 
 @login_required
 @require_POST
 @transaction.atomic
 def matchmaking(request):
-    """
-    MATCHMAKING RULES
-    1. Rejoin unfinished game (waiting or active)
-    2. Else join open waiting game (<6 players)
-    3. Else create new game
-    """
-
     # 1️⃣ Rejoin unfinished game
     existing_player = Player.objects.select_for_update().filter(
         user=request.user,
@@ -108,15 +76,15 @@ def matchmaking(request):
 
     # 2️⃣ Find open waiting game with space
     open_game = (
-    GameSession.objects
-    .filter(is_active=False, is_finished=False)
-    .annotate(player_count=Count('players'))
-    .filter(player_count__lt=6)
-    .order_by('created_at')
-    .first()
-)
+        GameSession.objects
+        .filter(is_active=False, is_finished=False)
+        .annotate(player_count=Count('players'))
+        .filter(player_count__lt=6)
+        .order_by('created_at')
+        .first()
+    )
 
-# Lock the row separately
+    # Lock the row separately
     if open_game:
         open_game = GameSession.objects.select_for_update().get(id=open_game.id)
 
@@ -126,7 +94,7 @@ def matchmaking(request):
             room_code=f"G{GameSession.objects.count() + 1}"
         )
 
-    # 4️⃣ Prevent duplicate join (safety)
+    # 4️⃣ Prevent duplicate join
     if Player.objects.filter(user=request.user, game=open_game).exists():
         return redirect('waiting_room', game_id=open_game.id)
 
@@ -141,7 +109,7 @@ def matchmaking(request):
         asset_count=2
     )
 
-    # 6️⃣ BROADCAST UPDATED PLAYER COUNT
+    # 6️⃣ Broadcast updated player count
     player_count = open_game.players.count()
 
     async_to_sync(get_channel_layer().group_send)(
@@ -157,20 +125,14 @@ def matchmaking(request):
         open_game.initialize_game()
         open_game.is_active = True
         open_game.save()
-        # NOTIFY ALL WAITING CLIENTS THAT GAME STARTED
         async_to_sync(get_channel_layer().group_send)(
             f"waiting_{open_game.id}",
-            {
-                "type": "game_started",
-            }
+            {"type": "game_started"}
         )
         return redirect('game_interface', game_id=open_game.id)
 
     # 8️⃣ Otherwise stay in waiting room
     return redirect('waiting_room', game_id=open_game.id)
-
-
-
 
 
 # ============================================================
@@ -180,12 +142,10 @@ def matchmaking(request):
 @login_required
 def waiting_room(request, game_id):
     game = get_object_or_404(GameSession, id=game_id)
-
     player = Player.objects.filter(user=request.user, game=game).first()
 
     if not player:
         return redirect('home')
-
 
     if game.is_active:
         return redirect('game_interface', game_id=game.id)
@@ -198,7 +158,6 @@ def waiting_room(request, game_id):
     })
 
 
-
 # ============================================================
 # === VIEW: GAME INTERFACE ===================================
 # ============================================================
@@ -209,17 +168,12 @@ def game_interface(request, game_id):
     if not game:
         return redirect("home")
 
-    # =====================================================
-    # === HANDLE FINISHED GAME (Leaderboard Phase) ========
-    # =====================================================
     if game.is_finished:
-
         if not game.finished_at:
             return redirect("home")
 
         elapsed = (timezone.now() - game.finished_at).total_seconds()
 
-        # After 30 seconds → go home
         if elapsed >= 30:
             return redirect("home")
 
@@ -227,8 +181,7 @@ def game_interface(request, game_id):
 
         players = []
         for p in game.players.select_related('user'):
-            final_score = p.cash + ((p.asset_count-3) * true_asset_value)
-
+            final_score = p.cash + ((p.asset_count - 3) * true_asset_value)
             players.append({
                 "username": p.user.username,
                 "seat": p.seat_number,
@@ -245,29 +198,19 @@ def game_interface(request, game_id):
             "remaining_time": int(30 - elapsed)
         })
 
-    # =====================================================
-    # === NORMAL GAME FLOW ================================
-    # =====================================================
-
     player = Player.objects.filter(user=request.user, game=game).first()
     if not player:
         return redirect("home")
-
-    trade_log = None
 
     # =====================================================
     # ================= FINAL PHASE =======================
     # =====================================================
     if game.current_round > 6:
-
         true_asset_value = sum(game.hidden_array) if game.hidden_array else 0
 
-        # Mark game finished ONLY ONCE
         if not game.is_finished:
             for p in game.players.all():
-                # Subtracts the 3 initial assets so doing nothing equals 0
                 final_score = p.cash + ((p.asset_count - 3) * true_asset_value)
-
                 profile, _ = Profile.objects.get_or_create(user=p.user)
                 profile.total_pnl += final_score
                 profile.save()
@@ -277,31 +220,20 @@ def game_interface(request, game_id):
             game.finished_at = timezone.now()
             game.save()
 
-        # Redirect so top block handles leaderboard
         return redirect("game_interface", game_id=game.id)
 
     # =====================================================
     # ================= LOG PHASE =========================
     # =====================================================
     if game.round_phase == "log":
-
         elapsed = (timezone.now() - game.round_start_time).total_seconds()
 
-        # 🔴 Move to next round after 10 seconds
         if elapsed >= 10:
             game.current_round += 1
             game.round_phase = "play"
             game.round_start_time = timezone.now()
-
-            # 🔴 Clear previous trade log
-            # game.last_trade_log = []                  // ADDED
             game.save()
-
             return redirect("game_interface", game_id=game.id)
-
-        # 🔴 Fetch trade log from JSONField
-        # trade_log = game.last_trade_log 
-        trade_log = game.last_trade_log or []       # ADDED
 
         players = game.players.select_related('user').order_by('seat_number')
 
@@ -314,15 +246,14 @@ def game_interface(request, game_id):
             'current_server_time': timezone.now(),
             'round_end_time': 0,
             'show_trade_log_popup': True,
-            'trade_log': game.last_trade_log or [],              
-            'current_round_trades': game.current_round_trades or [], 
+            'trade_log': game.last_trade_log or [],
+            'current_round_trades': game.current_round_trades or [],
         })
 
     # =====================================================
     # ================= PLAY PHASE ========================
     # =====================================================
     if game.round_phase == "play":
-
         if game.round_start_time is None:
             game.round_start_time = timezone.now()
             game.save()
@@ -336,7 +267,6 @@ def game_interface(request, game_id):
         elapsed = (timezone.now() - game.round_start_time).total_seconds()
 
         if elapsed >= 30:
-
             orders_qs = Order.objects.filter(
                 game=game,
                 round_number=game.current_round,
@@ -344,7 +274,6 @@ def game_interface(request, game_id):
             )
 
             orders_list = list(orders_qs.select_related('player'))
-
             orders_data = [
                 {
                     'ID': o.player.id,
@@ -355,8 +284,8 @@ def game_interface(request, game_id):
                 for o in orders_list
             ]
 
-            round_trades = []  # 🔴 This will go into last_trade_log
-            full_trade_history = game.last_trade_log or []          # ADDED
+            round_trades = []
+            full_trade_history = game.last_trade_log or []
 
             if orders_data:
                 df = pd.DataFrame(orders_data)
@@ -369,17 +298,13 @@ def game_interface(request, game_id):
                         seller = Player.objects.get(id=trade['from_id'])
                         trade_price = int(trade['amt'])
 
-                        # Update balances
                         buyer.cash -= trade_price
                         buyer.asset_count += 1
-
                         seller.cash += trade_price
                         seller.asset_count -= 1
-
                         buyer.save()
                         seller.save()
 
-                        # Store trade
                         trade_data = {
                             "round": game.current_round,
                             "buyer": buyer.user.username,
@@ -389,11 +314,9 @@ def game_interface(request, game_id):
                         round_trades.append(trade_data)
                         full_trade_history.append(trade_data)
 
-            # 🔴 Save trade log to GameSession
             game.last_trade_log = full_trade_history
             game.current_round_trades = round_trades
             orders_qs.update(is_active=False)
-
             game.round_phase = "log"
             game.round_start_time = timezone.now()
             game.save()
@@ -418,19 +341,12 @@ def game_interface(request, game_id):
             'current_server_time': timezone.now(),
             'round_end_time': 30,
             'show_trade_log_popup': False,
-            # 'trade_log': trade_log,
-            'trade_log': game.last_trade_log or [],     # ADDED
+            'trade_log': game.last_trade_log or [],
         })
 
 
-
-
 # ============================================================
-# === API: PLACE ORDER (UNCHANGED CORE LOGIC) ================
-# ============================================================
-
-# ============================================================
-# --- IT IS WRONG CURRENTLY A PLACEHOLDER----
+# === API: PLACE ORDER =======================================
 # ============================================================
 
 @login_required
@@ -452,7 +368,6 @@ def api_place_order(request):
 
     current_round = game.current_round
 
-    # ✅ LIMIT: 1 order per type per round
     if Order.objects.filter(
         player=player,
         game=game,
@@ -464,15 +379,13 @@ def api_place_order(request):
             'message': f'Only ONE {order_type} allowed per round'
         })
 
-    # ✅ SELL validation
     if order_type == 'ASK' and player.asset_count < 1:
         return JsonResponse({
             'status': 'error',
             'message': 'You have no assets to sell'
         })
 
-    # ✅ Create order
-    order = Order.objects.create(
+    Order.objects.create(
         player=player,
         game=game,
         order_type=order_type,
@@ -481,26 +394,11 @@ def api_place_order(request):
         is_active=True
     )
 
-    # --- Store order in DataFrame-compatible structure (in-memory, per game/round) ---
-    # This is a placeholder: in production, use cache or DB for multi-process safety
-    import threading
-    if not hasattr(game, '_orders_df'):  # Attach to game instance for this process
-        game._orders_df = []
-        game._orders_df_lock = threading.Lock()
-    with game._orders_df_lock:
-        game._orders_df.append({
-            'ID': player.id,
-            'Quote': order_type.lower(),
-            'Amt': price,
-            'Time': order.created_at.timestamp(),
-        })
-
-    # ⛔ DO NOT deactivate other orders here
-
     return JsonResponse({
         'status': 'queued',
         'message': 'Order placed. Waiting for match.'
     })
+
 
 @login_required
 def view_player_info(request):
@@ -508,12 +406,7 @@ def view_player_info(request):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     users = list(
         User.objects.all().values(
-            "id",
-            "username",
-            "email",
-            "is_active",
-            "date_joined",
-            "last_login"
+            "id", "username", "email", "is_active", "date_joined", "last_login"
         )
     )
     return JsonResponse({"users": users})
