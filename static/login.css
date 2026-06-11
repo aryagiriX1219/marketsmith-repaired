@@ -284,3 +284,28 @@ outline:none;
 ```
 
 }
+.login-card {
+    color: #111;
+}
+
+.login-card * {
+    color: #111;
+}
+
+.login-card label {
+    color: #111 !important;
+    font-weight: 600;
+}
+
+.login-card ul,
+.login-card li,
+.helptext {
+    color: #666 !important;
+    font-size: 13px;
+}
+
+.errorlist,
+.errorlist li {
+    color: #d90429 !important;
+    list-style: none;
+}
