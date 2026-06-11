@@ -5,17 +5,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Game Interface</title>
+    <title>QuantX Trading Arena</title>
     <link rel="stylesheet" href="{% static 'gameplay.css' %}">
 </head>
 <body>
     <div class="logo-center-container">
-        <img src="{% static 'logo.png' %}" alt="Logo 1" class="header-logo">
-    </div>
-    <div class="logo-center-container1">
-        <img src="{% static 'logo2.png' %}" alt="Logo 2" class="header-logo">
+    <img src="{% static 'logo.png' %}" alt="Quant Club IIT BHU" class="header-logo">
     </div>
     <div class="app-container">
+        <div style="
+position:fixed;
+top:10px;
+left:50%;
+transform:translateX(-50%);
+z-index:1000;
+text-align:center;
+">
+    <div style="
+    color:#fbbf24;
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:2px;">
+        QUANTX WEEK 2
+    </div>
+
+    <div style="
+    color:white;
+    font-size:13px;">
+        Quant Club IIT BHU Summer Camp
+    </div>
+</div>
         <div class="left-panel">
             <div class="question-container">
                 <h2 id="question-text">
