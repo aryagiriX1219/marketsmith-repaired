@@ -12,13 +12,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "marketsmith-repaired-production.up.railway.app",
+    "marketsmith-quantx.up.railway.app",
     "127.0.0.1",
     "localhost"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://marketsmith-repaired-production.up.railway.app",
+    "https://marketsmith-quantx.up.railway.app",
 ]
 
 INSTALLED_APPS = [
