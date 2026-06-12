@@ -48,7 +48,7 @@
                             <div class="player-info">
                                 <div class="player-stats">💰${{ p.cash }} &nbsp; 📦{{ p.asset_count }}</div>
                                 <span class="player-name" title="{{ p.user.username }}">
-                                    {{ p.user.username|truncatechars:14 }}
+                                    {{ p.user.first_name|default:p.user.username|truncatechars:16 }}
                                 </span>
                             </div>
                             <div class="player"></div>
@@ -56,7 +56,7 @@
                             <div class="player"></div>
                             <div class="player-info">
                                 <span class="player-name" title="{{ p.user.username }}">
-                                    {{ p.user.username|truncatechars:14 }}
+                                    {{ p.user.first_name|default:p.user.username|truncatechars:16 }}
                                 </span>
                                 <div class="player-stats">💰${{ p.cash }} &nbsp; 📦{{ p.asset_count }}</div>
                             </div>
