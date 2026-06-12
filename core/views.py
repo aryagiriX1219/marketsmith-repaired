@@ -90,8 +90,9 @@ def matchmaking(request):
 
     # 3️⃣ Create game if none available
     if not open_game:
+        import uuid
         open_game = GameSession.objects.create(
-            room_code=f"G{GameSession.objects.count() + 1}"
+            room_code=f"G{uuid.uuid4().hex[:6].upper()}"
         )
 
     # 4️⃣ Prevent duplicate join
