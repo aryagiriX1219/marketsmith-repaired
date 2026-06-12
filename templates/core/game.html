@@ -174,8 +174,23 @@
         let remaining   = duration - (nowTime - startTime);
 
         const timerDiv = document.createElement("div");
-        timerDiv.className = "timer-box";
-        document.querySelector(".question-container").appendChild(timerDiv);
+timerDiv.style.cssText = `
+    position: fixed;
+    top: 62px;
+    right: 20px;
+    background: rgba(15,23,42,0.92);
+    border: 1px solid rgba(251,191,36,0.5);
+    border-radius: 10px;
+    padding: 8px 18px;
+    color: #fbbf24;
+    font-size: 18px;
+    font-weight: 800;
+    z-index: 1001;
+    letter-spacing: 1px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+`;
+document.body.appendChild(timerDiv);
 
         const interval = setInterval(() => {
             if (remaining <= 0) {
