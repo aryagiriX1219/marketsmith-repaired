@@ -114,34 +114,17 @@
     const gameId = "{{ game.id }}";
     const maxPlayers = {{ max_players }};
 
-    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-
-    const socket = new WebSocket(
-        protocol + window.location.host + "/ws/waiting/" + gameId + "/"
-    );
-
-    socket.onmessage = function(event) {
-
-        const data = JSON.parse(event.data);
-
-        if (data.type === "player_joined") {
-
-            document.getElementById("player-count").innerText =
-                data.player_count;
-
-            if (data.player_count >= maxPlayers) {
-                window.location.href = "/game/" + gameId + "/";
-            }
-        }
-
-        if (data.type === "game_started") {
-            window.location.href = "/game/" + gameId + "/";
-        }
-    };
-
-    socket.onerror = function() {
-        console.error("WebSocket connection error.");
-    };
+    setInterval(function() {
+        fetch('/poll/waiting/' + gameId + '/')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById("player-count").innerText = data.player_count;
+                if (data.game_started || data.player_count >= maxPlayers) {
+                    window.location.href = '/game/' + gameId + '/';
+                }
+            })
+            .catch(err => console.log('Poll error:', err));
+    }, 2000);
 </script>
 ```
 
