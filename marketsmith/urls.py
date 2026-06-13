@@ -49,7 +49,7 @@ urlpatterns = [
 
     path('cleanup/<int:game_id>/', views.cleanup_game, name='cleanup_game'),
 
-    path('view_players/', views.view_player_info, name='players')
+    path('view_players/', views.view_player_info, name='players'),
 
     path('poll/waiting/<int:game_id>/', views.poll_waiting, name='poll_waiting'),
 
