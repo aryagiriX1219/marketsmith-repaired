@@ -51,4 +51,6 @@ urlpatterns = [
 
     path('view_players/', views.view_player_info, name='players')
 
+    path('poll/waiting/<int:game_id>/', views.poll_waiting, name='poll_waiting'),
+
 ]
