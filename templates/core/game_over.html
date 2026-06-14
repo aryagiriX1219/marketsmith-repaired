@@ -1,145 +1,121 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuantX Week 2 Leaderboard</title>
-
-```
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-
-<style>
-    body {
-        margin: 0;
-        min-height: 100vh;
-        background: linear-gradient(135deg,#0f172a,#1e293b);
-        color: white;
-        font-family: 'PT Sans', sans-serif;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 30px;
-    }
-
-    .leaderboard-container {
-        width: 90%;
-        max-width: 1000px;
-
-        background: rgba(255,255,255,0.06);
-        backdrop-filter: blur(12px);
-
-        border-radius: 20px;
-        padding: 40px;
-
-        box-shadow: 0 15px 50px rgba(0,0,0,0.35);
-    }
-
-    .brand {
-        text-align: center;
-        margin-bottom: 10px;
-        color: #fbbf24;
-        font-size: 2.8rem;
-        font-weight: 700;
-        letter-spacing: 3px;
-    }
-
-    .subtitle {
-        text-align: center;
-        color: #cbd5e1;
-        margin-bottom: 30px;
-        font-size: 1rem;
-    }
-
-    h2 {
-        text-align: center;
-        color: #ffffff;
-        font-family: 'Lora', serif;
-        margin-bottom: 30px;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th {
-        background: rgba(255,255,255,0.08);
-        color: #fbbf24;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.9rem;
-    }
-
-    th,
-    td {
-        padding: 14px;
-        text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-
-    tr:hover {
-        background: rgba(255,255,255,0.05);
-    }
-
-    .pnl-positive {
-        color: #22c55e;
-        font-weight: bold;
-    }
-
-    .pnl-negative {
-        color: #ef4444;
-        font-weight: bold;
-    }
-
-    .pnl-zero {
-        color: white;
-        font-weight: bold;
-    }
-
-    .redirect-msg {
-        margin-top: 30px;
-        text-align: center;
-        color: #cbd5e1;
-    }
-
-    .countdown {
-        color: #fbbf24;
-        font-size: 1.3rem;
-        font-weight: bold;
-    }
-
-    .winner-banner {
-        text-align: center;
-        margin-bottom: 25px;
-        color: #fbbf24;
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-</style>
-```
-
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg,#0f172a,#1e293b);
+            color: white;
+            font-family: 'PT Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        .leaderboard-container {
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.35);
+        }
+        .brand {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #fbbf24;
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        .true-value-box {
+            text-align: center;
+            margin-bottom: 28px;
+            padding: 16px;
+            background: rgba(251,191,36,0.1);
+            border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 12px;
+        }
+        .true-value-label {
+            font-family: 'PT Sans', sans-serif;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .true-value-number {
+            color: #fbbf24;
+            font-size: 3rem;
+            font-weight: 800;
+            font-family: 'Lora', serif;
+            line-height: 1.1;
+        }
+        h2 {
+            text-align: center;
+            color: #ffffff;
+            font-family: 'Lora', serif;
+            margin-bottom: 20px;
+        }
+        .winner-banner {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #fbbf24;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: rgba(255,255,255,0.08);
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        tr:hover { background: rgba(255,255,255,0.05); }
+        .pnl-positive { color: #22c55e; font-weight: bold; }
+        .pnl-negative { color: #ef4444; font-weight: bold; }
+        .pnl-zero { color: white; font-weight: bold; }
+        .redirect-msg {
+            margin-top: 30px;
+            text-align: center;
+            color: #cbd5e1;
+        }
+        .countdown { color: #fbbf24; font-size: 1.3rem; font-weight: bold; }
+    </style>
 </head>
-
 <body>
-
-```
 <div class="leaderboard-container">
+    <div class="brand">QUANTX</div>
+    <div class="subtitle">Quant Club IIT BHU • Summer Camp Week 2</div>
 
-    <div class="brand">
-        QUANTX
-    </div>
-
-    <div class="subtitle">
-        Quant Club IIT BHU • Summer Camp Week 2
+    <div class="true-value-box">
+        <div class="true-value-label">True Asset Value Revealed</div>
+        <div class="true-value-number">{{ true_asset_value }}</div>
     </div>
 
     <h2>Final Leaderboard</h2>
-
-    <div class="winner-banner">
-        Top Traders of the Round
-    </div>
+    <div class="winner-banner">Top Traders of the Round</div>
 
     <table>
         <thead>
@@ -152,75 +128,38 @@
                 <th>Net PnL</th>
             </tr>
         </thead>
-
         <tbody>
-
             {% for p in players %}
             <tr>
-
-                <td>
-                    #{{ forloop.counter }}
-                </td>
-
-                <td>
-                    <strong>{{ p.username }}</strong>
-                </td>
-
-                <td>
-                    {{ p.seat }}
-                </td>
-
-                <td>
-                    ${{ p.cash }}
-                </td>
-
-                <td>
-                    {{ p.assets }}
-                </td>
-
+                <td>#{{ forloop.counter }}</td>
+                <td><strong>{{ p.username }}</strong></td>
+                <td>{{ p.seat }}</td>
+                <td>${{ p.cash }}</td>
+                <td>{{ p.assets }}</td>
                 <td class="{% if p.net_pnl > 0 %}pnl-positive{% elif p.net_pnl < 0 %}pnl-negative{% else %}pnl-zero{% endif %}">
                     ${{ p.net_pnl }}
                 </td>
-
             </tr>
             {% endfor %}
-
         </tbody>
     </table>
 
     <div class="redirect-msg">
-        Returning to Lobby in
-        <span id="countdown" class="countdown">
-            {{ remaining_time }}
-        </span>
-        seconds...
+        Returning to Lobby in <span id="countdown" class="countdown">{{ remaining_time }}</span> seconds...
     </div>
-
 </div>
 
 <script>
     let timeLeft = parseInt("{{ remaining_time }}", 10);
-
-    const countdownEl =
-        document.getElementById("countdown");
-
+    const countdownEl = document.getElementById("countdown");
     const interval = setInterval(() => {
-
         timeLeft--;
-
         countdownEl.innerText = timeLeft;
-
         if (timeLeft <= 0) {
-
             clearInterval(interval);
-
-            window.location.href =
-                "/cleanup/{{ game.id }}/";
+            window.location.href = "/cleanup/{{ game.id }}/";
         }
-
     }, 1000);
 </script>
-```
-
 </body>
 </html>
