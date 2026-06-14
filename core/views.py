@@ -306,13 +306,12 @@ def game_interface(request, game_id):
 
         players = game.players.select_related('user').order_by('seat_number')
 
-        # Player's orders this round
-        my_orders = Order.objects.filter(
+        # Player's orders this round — just the types placed
+        my_orders = list(Order.objects.filter(
             player=player,
             game=game,
             round_number=game.current_round,
-            is_active=True
-        )
+        ).values_list('order_type', 'price'))
 
         return render(request, 'core/game.html', {
             'game': game,
