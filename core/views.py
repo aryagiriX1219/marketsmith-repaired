@@ -193,6 +193,8 @@ def game_interface(request, game_id):
     if game.current_round > 6:
         true_asset_value = sum(game.hidden_array) if game.hidden_array else 0
 
+    with transaction.atomic():
+        game = GameSession.objects.select_for_update().get(id=game.id)
         if not game.is_finished:
             for p in game.players.all():
                 final_score = p.cash + ((p.asset_count - 3) * true_asset_value)
