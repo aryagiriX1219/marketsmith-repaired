@@ -90,7 +90,14 @@ def matchmaking(request):
     if Player.objects.filter(user=request.user, game=open_game).exists():
         return redirect('waiting_room', game_id=open_game.id)
 
-    seat_number = open_game.players.count() + 1
+    # Re-check the count after acquiring the row lock to prevent race conditions
+    # that would allow a 7th player to join a full 6-player lobby.
+    current_count = open_game.players.count()
+    if current_count >= 6:
+        # This lobby filled up between our search and our lock — try again.
+        return redirect('home')
+
+    seat_number = current_count + 1
 
     Player.objects.create(
         user=request.user,
@@ -265,28 +272,32 @@ def game_interface(request, game_id):
                 trades = trades_df(df)
 
                 if not trades.empty:
-                    for _, trade in trades.iterrows():
-                        buyer = Player.objects.get(id=trade['to_id'])
-                        seller = Player.objects.get(id=trade['from_id'])
-                        trade_price = int(trade['amt'])
+                    with transaction.atomic():
+                        for _, trade in trades.iterrows():
+                            # Re-fetch with row-level lock so back-to-back trades
+                            # for the same seller always see the latest asset_count.
+                            buyer = Player.objects.select_for_update().get(id=trade['to_id'])
+                            seller = Player.objects.select_for_update().get(id=trade['from_id'])
+                            trade_price = int(trade['amt'])
 
-                        # ✅ Prevent negative assets
-                        if seller.asset_count >= 1:
-                            buyer.cash -= trade_price
-                            buyer.asset_count += 1
-                            seller.cash += trade_price
-                            seller.asset_count -= 1
-                            buyer.save()
-                            seller.save()
+                            # Strict minimum: seller must keep at least 1 asset
+                            # after the trade, so asset_count never reaches 0.
+                            if seller.asset_count > 1:
+                                buyer.cash -= trade_price
+                                buyer.asset_count += 1
+                                seller.cash += trade_price
+                                seller.asset_count -= 1
+                                buyer.save()
+                                seller.save()
 
-                            trade_data = {
-                                "round": game.current_round,
-                                "buyer": buyer.user.first_name or buyer.user.username,
-                                "seller": seller.user.first_name or seller.user.username,
-                                "price": trade_price
-                            }
-                            round_trades.append(trade_data)
-                            full_trade_history.append(trade_data)
+                                trade_data = {
+                                    "round": game.current_round,
+                                    "buyer": buyer.user.first_name or buyer.user.username,
+                                    "seller": seller.user.first_name or seller.user.username,
+                                    "price": trade_price
+                                }
+                                round_trades.append(trade_data)
+                                full_trade_history.append(trade_data)
 
             game.last_trade_log = full_trade_history
             game.current_round_trades = round_trades
@@ -364,11 +375,14 @@ def api_place_order(request):
             'message': f'Only ONE {order_type} allowed per round'
         })
 
-    # ✅ No assets = cannot sell
-    if order_type == 'ASK' and player.asset_count < 1:
+    # Refresh from DB to get the latest asset_count, then enforce the
+    # minimum-1 rule: a player must always keep at least 1 asset, so
+    # selling is only allowed when they currently hold more than 1.
+    player.refresh_from_db()
+    if order_type == 'ASK' and player.asset_count <= 1:
         return JsonResponse({
             'status': 'error',
-            'message': 'You have no assets to sell'
+            'message': 'You must keep at least 1 asset and cannot sell your last one'
         })
 
     Order.objects.create(
