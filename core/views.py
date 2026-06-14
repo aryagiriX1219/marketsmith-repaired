@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
 from core.models import Profile
 import pandas as pd
+import uuid
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -46,7 +47,7 @@ def home(request):
 
     profile = Profile.objects.filter(user=request.user).first()
     total_pnl = profile.total_pnl if profile else 0
-    leaderboard = Profile.objects.values('user__username', 'total_pnl').order_by('-total_pnl')[:50]
+    leaderboard = Profile.objects.select_related('user').values('user__first_name', 'user__username', 'total_pnl').order_by('-total_pnl')[:50]
 
     return render(request, "lobby/lobby.html", {
         "total_pnl": total_pnl,
@@ -54,15 +55,10 @@ def home(request):
     })
 
 
-# ============================================================
-# === VIEW: MATCHMAKING ======================================
-# ============================================================
-
 @login_required
 @require_POST
 @transaction.atomic
 def matchmaking(request):
-    # 1️⃣ Rejoin unfinished game
     existing_player = Player.objects.select_for_update().filter(
         user=request.user,
         game__is_finished=False
@@ -74,7 +70,6 @@ def matchmaking(request):
             return redirect('game_interface', game_id=game.id)
         return redirect('waiting_room', game_id=game.id)
 
-    # 2️⃣ Find open waiting game with space
     open_game = (
         GameSession.objects
         .filter(is_active=False, is_finished=False)
@@ -84,22 +79,17 @@ def matchmaking(request):
         .first()
     )
 
-    # Lock the row separately
     if open_game:
         open_game = GameSession.objects.select_for_update().get(id=open_game.id)
 
-    # 3️⃣ Create game if none available
     if not open_game:
-        import uuid
         open_game = GameSession.objects.create(
-            room_code=f"{uuid.uuid4().hex[:6].upper()}"
+            room_code=uuid.uuid4().hex[:6].upper()
         )
 
-    # 4️⃣ Prevent duplicate join
     if Player.objects.filter(user=request.user, game=open_game).exists():
         return redirect('waiting_room', game_id=open_game.id)
 
-    # 5️⃣ Assign seat
     seat_number = open_game.players.count() + 1
 
     Player.objects.create(
@@ -110,7 +100,6 @@ def matchmaking(request):
         asset_count=2
     )
 
-    # 6️⃣ Broadcast updated player count
     player_count = open_game.players.count()
 
     async_to_sync(get_channel_layer().group_send)(
@@ -121,7 +110,6 @@ def matchmaking(request):
         }
     )
 
-    # 7️⃣ Start game if full
     if player_count == 6:
         open_game.initialize_game()
         open_game.is_active = True
@@ -132,13 +120,8 @@ def matchmaking(request):
         )
         return redirect('game_interface', game_id=open_game.id)
 
-    # 8️⃣ Otherwise stay in waiting room
     return redirect('waiting_room', game_id=open_game.id)
 
-
-# ============================================================
-# === VIEW: WAITING ROOM =====================================
-# ============================================================
 
 @login_required
 def waiting_room(request, game_id):
@@ -158,10 +141,6 @@ def waiting_room(request, game_id):
         'max_players': 6,
     })
 
-
-# ============================================================
-# === VIEW: GAME INTERFACE ===================================
-# ============================================================
 
 @login_required
 def game_interface(request, game_id):
@@ -184,7 +163,7 @@ def game_interface(request, game_id):
         for p in game.players.select_related('user'):
             final_score = p.cash + ((p.asset_count - 3) * true_asset_value)
             players.append({
-                "username": p.user.username,
+                "username": p.user.first_name or p.user.username,
                 "seat": p.seat_number,
                 "cash": p.cash,
                 "assets": p.asset_count,
@@ -196,16 +175,14 @@ def game_interface(request, game_id):
         return render(request, "core/game_over.html", {
             "game": game,
             "players": players,
-            "remaining_time": int(30 - elapsed)
+            "remaining_time": int(30 - elapsed),
+            "true_asset_value": true_asset_value
         })
 
     player = Player.objects.filter(user=request.user, game=game).first()
     if not player:
         return redirect("home")
 
-    # =====================================================
-    # ================= FINAL PHASE =======================
-    # =====================================================
     if game.current_round > 6:
         true_asset_value = sum(game.hidden_array) if game.hidden_array else 0
 
@@ -223,9 +200,6 @@ def game_interface(request, game_id):
 
         return redirect("game_interface", game_id=game.id)
 
-    # =====================================================
-    # ================= LOG PHASE =========================
-    # =====================================================
     if game.round_phase == "log":
         elapsed = (timezone.now() - game.round_start_time).total_seconds()
 
@@ -251,9 +225,6 @@ def game_interface(request, game_id):
             'current_round_trades': game.current_round_trades or [],
         })
 
-    # =====================================================
-    # ================= PLAY PHASE ========================
-    # =====================================================
     if game.round_phase == "play":
         if game.round_start_time is None:
             game.round_start_time = timezone.now()
@@ -295,25 +266,27 @@ def game_interface(request, game_id):
 
                 if not trades.empty:
                     for _, trade in trades.iterrows():
-                        buyer = Player.objects.get(id=trade['to_id'])
-                        seller = Player.objects.get(id=trade['from_id'])
+                        buyer = Player.objects.select_for_update().get(id=trade['to_id'])
+                        seller = Player.objects.select_for_update().get(id=trade['from_id'])
                         trade_price = int(trade['amt'])
 
-                        buyer.cash -= trade_price
-                        buyer.asset_count += 1
-                        seller.cash += trade_price
-                        seller.asset_count -= 1
-                        buyer.save()
-                        seller.save()
+                        # ✅ Prevent negative assets
+                        if seller.asset_count >= 1:
+                            buyer.cash -= trade_price
+                            buyer.asset_count += 1
+                            seller.cash += trade_price
+                            seller.asset_count -= 1
+                            buyer.save()
+                            seller.save()
 
-                        trade_data = {
-                            "round": game.current_round,
-                            "buyer": buyer.user.username,
-                            "seller": seller.user.username,
-                            "price": trade_price
-                        }
-                        round_trades.append(trade_data)
-                        full_trade_history.append(trade_data)
+                            trade_data = {
+                                "round": game.current_round,
+                                "buyer": buyer.user.first_name or buyer.user.username,
+                                "seller": seller.user.first_name or seller.user.username,
+                                "price": trade_price
+                            }
+                            round_trades.append(trade_data)
+                            full_trade_history.append(trade_data)
 
             game.last_trade_log = full_trade_history
             game.current_round_trades = round_trades
@@ -346,10 +319,6 @@ def game_interface(request, game_id):
         })
 
 
-# ============================================================
-# === API: PLACE ORDER =======================================
-# ============================================================
-
 @login_required
 @transaction.atomic
 def api_place_order(request):
@@ -364,11 +333,18 @@ def api_place_order(request):
     except (ValueError, TypeError):
         return JsonResponse({'status': 'error', 'message': 'Price must be a whole number'})
 
+    # ✅ Price cap 100
+    if price > 100:
+        return JsonResponse({'status': 'error', 'message': 'Maximum price is 100'})
+    if price < 1:
+        return JsonResponse({'status': 'error', 'message': 'Minimum price is 1'})
+
     game = GameSession.objects.select_for_update().get(id=game_id)
     player = Player.objects.select_for_update().get(user=request.user, game=game)
 
     current_round = game.current_round
 
+    # ✅ 1 order per type per round
     if Order.objects.filter(
         player=player,
         game=game,
@@ -380,6 +356,7 @@ def api_place_order(request):
             'message': f'Only ONE {order_type} allowed per round'
         })
 
+    # ✅ No assets = cannot sell
     if order_type == 'ASK' and player.asset_count < 1:
         return JsonResponse({
             'status': 'error',
@@ -411,13 +388,3 @@ def view_player_info(request):
         )
     )
     return JsonResponse({"users": users})
-
-
-@login_required
-def poll_waiting(request, game_id):
-    game = get_object_or_404(GameSession, id=game_id)
-    player_count = game.players.count()
-    return JsonResponse({
-        "player_count": player_count,
-        "game_started": game.is_active,
-    })
