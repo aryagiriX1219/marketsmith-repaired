@@ -306,6 +306,14 @@ def game_interface(request, game_id):
 
         players = game.players.select_related('user').order_by('seat_number')
 
+        # Player's orders this round
+        my_orders = Order.objects.filter(
+            player=player,
+            game=game,
+            round_number=game.current_round,
+            is_active=True
+        )
+
         return render(request, 'core/game.html', {
             'game': game,
             'player': player,
@@ -316,6 +324,7 @@ def game_interface(request, game_id):
             'round_end_time': 30,
             'show_trade_log_popup': False,
             'trade_log': game.last_trade_log or [],
+            'my_orders': my_orders,
         })
 
 
