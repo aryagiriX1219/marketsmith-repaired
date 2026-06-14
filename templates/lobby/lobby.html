@@ -151,7 +151,7 @@
                         {% for player in leaderboard %}
                             <tr>
                                 <td>#{{ forloop.counter }}</td>
-                                <td>{{ player.user__username }}</td>
+                                <td>{{ player.user__first_name|default:player.user__username }}</td>
                                 <td>{{ player.total_pnl }}</td>
                             </tr>
                         {% endfor %}
@@ -203,8 +203,9 @@
                 <ul>
                     <li>If the highest bid is less than the lowest ask, no trades will be executed.</li>
                     <li>If the highest bid is higher than the lowest ask, trades will be executed following rules similar to a stock exchange.</li>
-                    <li>Trades will be executed at the ask price.</li>
+                    <li>Trades will be executed at the <strong>midpoint</strong> of the best bid and ask price.</li>
                     <li>Orders are matched from best bid and best ask outward.</li>
+                    <li>Maximum price allowed is <strong>100</strong>. You can place only <strong>one BID and one ASK</strong> per round.</li>
                     <li>In case of a tie, the player booking the order first will be given priority.</li>
                     <li>No money is kept by the dealer (sum of all players’ PnL is always zero).</li>
                 </ul>
