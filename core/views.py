@@ -388,3 +388,12 @@ def view_player_info(request):
         )
     )
     return JsonResponse({"users": users})
+
+
+@login_required
+def poll_waiting(request, game_id):
+    game = get_object_or_404(GameSession, id=game_id)
+    return JsonResponse({
+        'player_count': game.players.count(),
+        'is_active': game.is_active,
+    })
