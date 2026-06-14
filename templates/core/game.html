@@ -99,34 +99,14 @@
                 <div class="data-content" id="working-orders-list">
                     {% for o in my_orders %}
                     <div class="data-row order-item">
-                        <span style="color:{% if o.order_type == 'BID' %}#38a169{% else %}#e53e3e{% endif %};font-weight:bold;">
-                            {% if o.order_type == 'BID' %}Buy{% else %}Sell{% endif %}
+                        <span style="color:{% if o.0 == 'BID' %}#38a169{% else %}#e53e3e{% endif %};font-weight:bold;">
+                            {% if o.0 == 'BID' %}Buy{% else %}Sell{% endif %}
                         </span>
-                        <span>${{ o.price }}</span>
+                        <span>${{ o.1 }}</span>
                     </div>
                     {% endfor %}
                 </div>
-                {# Freeze buttons for already-placed orders on page load #}
-                {% for o in my_orders %}
-                    {% if o.order_type == 'BID' %}
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            placedOrders['BID'] = true;
-                            var b = document.getElementById('buy-btn');
-                            if(b){ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; b.title='BID already placed'; }
-                        });
-                    </script>
-                    {% endif %}
-                    {% if o.order_type == 'ASK' %}
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            placedOrders['ASK'] = true;
-                            var s = document.getElementById('sell-btn');
-                            if(s){ s.disabled=true; s.style.opacity='0.4'; s.style.cursor='not-allowed'; s.title='ASK already placed'; }
-                        });
-                    </script>
-                    {% endif %}
-                {% endfor %}
+
             </div>
 
             <div class="data-section">
@@ -195,6 +175,24 @@
     </script>
 
     <script src="{% static 'gameplay.js' %}"></script>
+
+    {# Freeze buttons if player already placed orders this round #}
+    {% if my_orders %}
+    <script>
+        {% for o in my_orders %}
+            {% if o.0 == 'BID' %}
+            placedOrders['BID'] = true;
+            pendingOrders['BID'] = true;
+            (function(){ var b = document.getElementById('buy-btn'); if(b){ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; } })();
+            {% endif %}
+            {% if o.0 == 'ASK' %}
+            placedOrders['ASK'] = true;
+            pendingOrders['ASK'] = true;
+            (function(){ var s = document.getElementById('sell-btn'); if(s){ s.disabled=true; s.style.opacity='0.4'; s.style.cursor='not-allowed'; } })();
+            {% endif %}
+        {% endfor %}
+    </script>
+    {% endif %}
 
     {% if round_start_time and round_end_time %}
     <script>
